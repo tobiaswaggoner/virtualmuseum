@@ -1,0 +1,1 @@
+This is the folder where the Unity Code will go. Create a subfolder for each client (in case we create multiple)
