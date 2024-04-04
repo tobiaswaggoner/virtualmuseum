@@ -21,8 +21,7 @@ public class VRHandScript : MonoBehaviour
         skeleton = GetComponent<OVRSkeleton>();
         StartCoroutine(CheckIfHandsDetected());
 
-        if(DetectPinch() && handsDetected){
-            
+        if(DetectPinch() && handsDetected && !thisHand.IsSystemGestureInProgress){
             if(thisHand.IsPointerPoseValid){
                 Transform handTipPos;
                 //Interaction with UI
