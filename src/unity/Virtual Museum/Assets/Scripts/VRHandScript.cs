@@ -54,10 +54,11 @@ public class VRHandScript : MonoBehaviour
             Physics.Raycast(ray, out RaycastHit hit);
 
             if(hit.transform.GetComponent<Button>()){
-                hit.transform.GetComponent<Button>().Select();
+                hit.transform.GetComponent<Button>().onClick.Invoke();
                 return;
             }
-
+            
+            if(!inputListener.sessionState.Equals(InputListener.SessionState.ToolPlacement)) return;
             inputListener.UpdateGhostPosition(hit.point);
             inputListener.PlaceTool();
         }
