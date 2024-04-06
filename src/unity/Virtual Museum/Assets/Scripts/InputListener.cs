@@ -19,26 +19,16 @@ public class InputListener : MonoBehaviour
     private Quaternion placementRotation = Quaternion.identity;
 
     private bool menuActive = false;
-    enum SessionState{
+    public enum SessionState{
         Selection,
         SpaceDefinition,
         ToolPlacement,
         Interaction
     }
 
-    private SessionState sessionState = SessionState.ToolPlacement;
+    public SessionState sessionState = SessionState.ToolPlacement;
     public void ActivateMenu(InputAction.CallbackContext context){
-
-        //Check if a menu is already active, if it is deactivate the current menu
-        //If it isn't, activate a menu according to current sessionState
-        if(menuActive){
-            UserInterfaces[(int) sessionState].SetActive(false);
-            menuActive = false;
-            return;
-        }
-
-        UserInterfaces[(int) sessionState].SetActive(true);
-        menuActive = true;
+        ActivateOverlay();
     }
     
     public void TriggerRight(InputAction.CallbackContext context){
@@ -48,27 +38,7 @@ public class InputListener : MonoBehaviour
             case SessionState.SpaceDefinition:
                 break;
             case SessionState.ToolPlacement:
-                //Check if tool has been placed
-                if(placedTool) {
-                    sessionState = SessionState.Interaction;
-                    Debug.LogError("Sessionstate was in 'ToolPlacement' when tool was already placed \n Changed state to 'Interaction'");
-                    return;
-                }
-                //If tool hasn't been placed, place tool at location and rotation of selection
-                var newTool = Instantiate(Tools[toolIndex]);
-                newTool.transform.position = placementPosition;
-                newTool.transform.rotation = placementRotation;
-                placedTool = true;
-                
-
-                //Deactivate current menu
-                UserInterfaces[(int) sessionState].SetActive(false);
-                menuActive = false;
-                //Switch sessionState over
-                sessionState = SessionState.Interaction;
-                //Deactivate and de-spawn Ghost;
-                Destroy(currentGhost);
-                ghostSpawned = false;
+                PlaceTool();
                 return;
             case SessionState.Interaction:
                 break;
@@ -81,14 +51,16 @@ public class InputListener : MonoBehaviour
 
     void Update()
     {
+        /*
+        ///Test function for displaying a ghost table at potential placement point 
         if(sessionState.Equals(SessionState.ToolPlacement) && menuActive){
             if(!ghostSpawned) {
                 currentGhost = Instantiate(ToolGhosts[toolIndex]);
                 ghostSpawned = true;
             }
-            if(currentGhost.activeSelf) currentGhost.SetActive(true);
-            //Cast a ray from the dominant VR hand (test case = right)
-            //For testing on PC cast ray through mousePoint
+            if(!currentGhost.activeSelf) currentGhost.SetActive(true);
+            ///Cast a ray from the dominant VR hand (test case = right)
+            ///For testing on PC cast ray through mousePoint
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if(Physics.Raycast(ray, out  hit)){
@@ -96,6 +68,84 @@ public class InputListener : MonoBehaviour
                 placementPosition = hit.point;
             }
         }
+        */
     }
 
+
+
+    ///Debugging and helper functions ----------------------------------------------------------------------------------------------------- <summary>
+    /// <summary>
+    /// Debugging function for activating table placement mode
+    /// </summary>    
+    public void ActivateTablePlacementMode(){
+        sessionState = SessionState.ToolPlacement;
+        ActivateOverlay();
+    }
+
+    /// <summary>
+    ///Check if a menu is already active, if it is deactivate the current menu
+    ///If it isn't, activate a menu according to current sessionState
+    /// </summary>
+    private void ActivateOverlay(){
+        
+        if(menuActive){
+            UserInterfaces[(int) sessionState].SetActive(false);
+            menuActive = false;
+            return;
+        }
+
+        UserInterfaces[(int) sessionState].SetActive(true);
+        menuActive = true;
+    }
+
+    ///<summary>
+    ///Places the currently selected tool, deactivates the current overlay and progresses the local sessionState to SessionState.interaction
+    ///Also destroys the current ghost  
+    ///</summary>
+    public void PlaceTool(){
+        ///Check if tool has been placed
+        if(placedTool) {
+            sessionState = SessionState.Interaction;
+            Debug.LogError("Sessionstate was in 'ToolPlacement' when tool was already placed \n Changed state to 'Interaction'");
+            return;
+        }
+        ///If tool hasn't been placed, place tool at location and rotation of selection
+        var newTool = Instantiate(Tools[toolIndex]);
+        newTool.transform.position = placementPosition;
+        newTool.transform.rotation = placementRotation;
+        placedTool = true;
+        
+
+        ///Deactivate current menu
+        UserInterfaces[(int) sessionState].SetActive(false);
+        menuActive = false;
+        ///Switch sessionState over
+        sessionState = SessionState.Interaction;
+        ///Deactivate and de-spawn Ghost;
+        Destroy(currentGhost);
+        ghostSpawned = false;
+        return;
+    }
+
+    ///<summary>
+    ///Activates the Ghost of the current object for visual placement, Instantiates one if it doesn't already exist 
+    ///</summary>
+    public void ActivateGhost(){
+        if(sessionState.Equals(SessionState.ToolPlacement) && menuActive){
+            if(!ghostSpawned) {
+                currentGhost = Instantiate(ToolGhosts[toolIndex]);
+                ghostSpawned = true;
+            }
+            if(!currentGhost.activeSelf) currentGhost.SetActive(true);
+        }
+    }
+
+    ///<summary>
+    ///Updates Ghost position to Vector3 Input
+    /// Use RaycastHit.point as position, not RaycastHit.transform.position
+    ///</summary> 
+    public void UpdateGhostPosition(Vector3 point){
+        currentGhost.transform.position = point;
+        placementPosition = point;
+    }
 }

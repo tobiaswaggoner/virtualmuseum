@@ -1,8 +1,9 @@
 using System;
 using UnityEngine;
-
-//The standard Interface for a flag
-//A flag is a point of interest on a given map. It is used for displaying information through text and visual animation
+///<summary>
+///The standard Interface for a flag
+///A flag is a point of interest on a given map. It is used for displaying information through text and visual animation
+/// </summary>
 public interface IFlag
 {
     int startTime {get; set;}

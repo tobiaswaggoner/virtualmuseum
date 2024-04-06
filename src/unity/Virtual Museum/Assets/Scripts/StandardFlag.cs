@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Oculus.Platform.Models;
 using UnityEngine;
 
-//A standard flag for displaying information about a point of interest
-//Has start and endTime for defining first mention and last seen documentation of the point of interest as well as Color attribute for 
-//categorization and visual clarity
+///A standard flag for displaying information about a point of interest
+///Has start and endTime for defining first mention and last seen documentation of the point of interest as well as Color attribute for 
+///categorization and visual clarity
 public class StandardFlag : MonoBehaviour, IFlag
 {
     public int startTime { get; set; }

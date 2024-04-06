@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//A flag for displaying the development of a territory across a time span
-//A territory is made up of Borders. Each border defining the current borders during a specific point within the overall time span
-//Includes start and end time, as well as definable position for information display to be able to represent a capital or center of the
-//territory. Also includes Color for categorization and visual clarity
+///A flag for displaying the development of a territory across a time span
+///A territory is made up of Borders. Each border defining the current borders during a specific point within the overall time span
+///Includes start and end time, as well as definable position for information display to be able to represent a capital or center of the
+///territory. Also includes Color for categorization and visual clarity
 public class Territory : MonoBehaviour, IFlag
 {
     public int startTime { get; set; }
@@ -45,7 +45,7 @@ public class Territory : MonoBehaviour, IFlag
         }
 
         if(newTime > currentEndingTime){
-            //advance time forward to next Border, also recursively call CheckForTimeAdvance
+            ///advance time forward to next Border, also recursively call CheckForTimeAdvance
             currentBorder = currentBorder.nextBorder;
             DrawNewBorders();
             currentStartingTime = currentBorder.startingTime;
@@ -56,7 +56,7 @@ public class Territory : MonoBehaviour, IFlag
         }
 
         if(newTime < currentStartingTime){
-            //advance time backward to last Border, also recursively call CheckForTimeAdvance
+            ///advance time backward to last Border, also recursively call CheckForTimeAdvance
             currentBorder = currentBorder.lastBorder;
             DrawNewBorders();
             currentStartingTime = currentBorder.startingTime;
@@ -69,7 +69,7 @@ public class Territory : MonoBehaviour, IFlag
     }
 
 
-    //Display the Information of current Flag
+    ///Display the Information of current Flag
     public void DisplayInformation()
     {
         try{
@@ -132,13 +132,13 @@ public class Territory : MonoBehaviour, IFlag
     }
 
     private void DrawNewBorders(){
-        //Get new edges from current Border and adjust texture
+        ///Get new edges from current Border and adjust texture
         throw new System.NotImplementedException();
     }
 
     public IEnumerator AnimateBorders(){
         List<Vector3> newEdges = currentBorder.edges;
-        //interpolate between each point in oldEdges and newEdges to create a Territory animation
+        ///interpolate between each point in oldEdges and newEdges to create a Territory animation
         throw new System.NotImplementedException();
     }
 
