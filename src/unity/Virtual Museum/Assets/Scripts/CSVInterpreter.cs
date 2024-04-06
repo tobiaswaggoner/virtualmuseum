@@ -41,7 +41,7 @@ public class CSVInterpreter : MonoBehaviour
             temp.Add(t[0]);
             temp.Add(t[1]);
         }
-        for(int i = 0; i < temp.Count - 1){
+        for(int i = 0; i < temp.Count - 1; i ++){
             var t = new String[2];
             t[0] = temp[i];
             t[1] = temp[i + 1];
