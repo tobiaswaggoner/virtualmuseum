@@ -8,18 +8,16 @@ using static OVRHand;
 public class VRHandScript : MonoBehaviour
 {
     private InputListener inputListener;
-    OVRHand thisHand;
-    OVRSkeleton skeleton;
+    [SerializeField] OVRHand thisHand;
     [SerializeField] private LineRenderer lineRenderer;
     bool handsDetected = false;
+    bool wasPinching = false;
 
     private Coroutine personalUICoroutine;
 
     private void Start()
     {
         inputListener = GameObject.Find("InputsAndLogic").GetComponent<InputListener>();
-        thisHand = GetComponent<OVRHand>();
-        skeleton = GetComponent<OVRSkeleton>();
         StartCoroutine(CheckIfHandsDetected());
         
     }
@@ -36,28 +34,7 @@ public class VRHandScript : MonoBehaviour
                 }
             }
         } else {
-            CheckForPinch();
-        }
-    }
-
-    /// <summary>
-    /// Handles interaction upon pinch. Currently places tool upon pinch
-    /// </summary>
-    private void CheckForPinch(){
-        Transform pinchTransform = DetectPinch(); 
-        if(pinchTransform.Equals(null)){    
-            ///Interaction with UI -> Cast a ray and look for interaction
-            Ray ray = new Ray(pinchTransform.position, pinchTransform.forward);
-            Physics.Raycast(ray, out RaycastHit hit);
-
-            if(hit.transform.GetComponent<Button>()){
-                hit.transform.GetComponent<Button>().onClick.Invoke();
-                return;
-            }
-            
-            if(!inputListener.sessionState.Equals(InputListener.SessionState.ToolPlacement)) return;
-            inputListener.UpdateGhostPosition(hit.point);
-            inputListener.PlaceTool();
+            DetectPinch(); 
         }
     }
 
@@ -106,34 +83,44 @@ public class VRHandScript : MonoBehaviour
     /// Tries to detect if this hand is pinching and displays Rays according to strength of the pinch
     /// </summary>
     /// <returns> The current index tip position if pinch strength is bigger than 0.9f </returns>
-    private Transform DetectPinch(){
+    private void DetectPinch(){
         bool isIndexFingerPinching = thisHand.GetFingerIsPinching(HandFinger.Index);
-        float indexFingerPinchStrength = thisHand.GetFingerPinchStrength(HandFinger.Index);
         TrackingConfidence confidence = thisHand.GetFingerConfidence(HandFinger.Index);
-        Transform indexTipTransform = null;
 
-        foreach(var b in skeleton.Bones){
-            if(b.Id.Equals(OVRSkeleton.BoneId.Hand_IndexTip)){
-                indexTipTransform = b.Transform;
+        if (!isIndexFingerPinching || confidence != TrackingConfidence.High)
+        {
+            if (wasPinching)
+            {
+                inputListener.PlaceTool();
             }
+            wasPinching = false;
+            lineRenderer.enabled = false;
+            return;
         }
 
-        if(isIndexFingerPinching == true && confidence == TrackingConfidence.High){
-            if(indexFingerPinchStrength > 0.9f){
-                ///Pinch has been detected and confirmed
-                ///What happens now is defined in CheckForPinch Function
-                DisplayRayFromPinchPosition(indexTipTransform, Color.green);
-                if(thisHand.IsPointerPoseValid) return indexTipTransform;
-            }
+        wasPinching = true;
 
-            if(indexFingerPinchStrength > 0.2f){
-                DisplayRayFromPinchPosition(indexTipTransform, Color.red);
-                ///Handle hovering over things here    
-            } else {
-                lineRenderer.enabled = false;
-            }
+        if(inputListener.sessionState != InputListener.SessionState.ToolPlacement) return;
+
+        var pinchTransform = thisHand.PointerPose;
+        var ray = new Ray(pinchTransform.position, pinchTransform.forward);
+        Physics.Raycast(ray, out RaycastHit hit);
+
+        Color color;
+        
+        if(hit.transform.gameObject.name=="TestFloor")
+        {
+            color = Color.green;
+            inputListener.ActivateGhost();
+            inputListener.UpdateGhostPosition(hit.point);
         }
-        return null;
+        else
+        {
+            color = Color.gray;
+            inputListener.DeactivateGhost();
+        }
+        DisplayRayFromPinchPosition(thisHand.PointerPose, color);
+
     }
 
     /// <summary>
@@ -142,10 +129,9 @@ public class VRHandScript : MonoBehaviour
     /// </summary>
     /// <param name="pinchTransform"></param>
     /// <param name="c"></param>
-    public void DisplayRayFromPinchPosition(Transform pinchTransform, Color c){
-        if(!lineRenderer){
-            throw new NotImplementedException("No line renderer assigned to this Object: " + gameObject.name);
-        }
+    public void DisplayRayFromPinchPosition(Transform pinchTransform, Color c)
+    {
+        if (!lineRenderer) return;
 
         lineRenderer.enabled = true;
         lineRenderer.startColor = c;

@@ -122,29 +122,37 @@ public class InputListener : MonoBehaviour
         ///Switch sessionState over
         sessionState = SessionState.Interaction;
         ///Deactivate and de-spawn Ghost;
-        Destroy(currentGhost);
-        ghostSpawned = false;
-        return;
+        DeactivateGhost();
     }
 
     ///<summary>
     ///Activates the Ghost of the current object for visual placement, Instantiates one if it doesn't already exist 
     ///</summary>
-    public void ActivateGhost(){
-        if(sessionState.Equals(SessionState.ToolPlacement) && menuActive){
-            if(!ghostSpawned) {
-                currentGhost = Instantiate(ToolGhosts[toolIndex]);
-                ghostSpawned = true;
-            }
-            if(!currentGhost.activeSelf) currentGhost.SetActive(true);
+    public void ActivateGhost()
+    {
+        if (sessionState != SessionState.ToolPlacement) return;
+
+        if(!ghostSpawned) {
+            currentGhost = Instantiate(ToolGhosts[toolIndex]);
+            ghostSpawned = true;
         }
+        if(!currentGhost.activeSelf) currentGhost.SetActive(true);
+    }
+    public void DeactivateGhost()
+    {
+        if (!ghostSpawned) return;
+        if(currentGhost.activeSelf) currentGhost.SetActive(false);
+        currentGhost = null;
+        ghostSpawned = false;
     }
 
     ///<summary>
     ///Updates Ghost position to Vector3 Input
     /// Use RaycastHit.point as position, not RaycastHit.transform.position
     ///</summary> 
-    public void UpdateGhostPosition(Vector3 point){
+    public void UpdateGhostPosition(Vector3 point)
+    {
+        if (currentGhost is null || ghostSpawned == false) return;
         currentGhost.transform.position = point;
         placementPosition = point;
     }
