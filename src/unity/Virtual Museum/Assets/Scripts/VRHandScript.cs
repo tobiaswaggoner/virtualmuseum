@@ -1,11 +1,8 @@
 using System;
 using System.Collections;
 using System.Linq;
-using Meta.WitAi.Attributes;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.InputSystem.XR;
 using static OVRHand;
 
 public class VRHandScript : MonoBehaviour
@@ -96,6 +93,7 @@ public class VRHandScript : MonoBehaviour
                 ///This part could potentially be used to activate the controller model
                 Debug.LogError("Couldn't detect hands, make sure lighting is sufficient and there is nothing occluding your hands");
             }
+            yield return new WaitForSeconds(1f);
         }
     }
     
