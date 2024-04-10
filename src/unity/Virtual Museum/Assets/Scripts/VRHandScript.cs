@@ -1,12 +1,20 @@
 using System;
 using System.Collections;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using static OVRHand;
 
 public class VRHandScript : MonoBehaviour
 {
+    //TEMPORARY VARIABLES FOR TESTING PURPOSES
+    [SerializeField] private GameObject markerPrefab;
+    private bool holdingMarker = false;
+    private GameObject currentMarker;
+    private FollowTransformScript followTransformScript;
+    //TEMPORARY VARIABLES FOR TESTING PURPOSES
+
     private InputListener inputListener;
     [SerializeField] OVRHand thisHand;
     [SerializeField] private LineRenderer lineRenderer;
@@ -19,7 +27,6 @@ public class VRHandScript : MonoBehaviour
     {
         inputListener = GameObject.Find("InputsAndLogic").GetComponent<InputListener>();
         StartCoroutine(CheckIfHandsDetected());
-        
     }
 
     void Update()
@@ -91,7 +98,14 @@ public class VRHandScript : MonoBehaviour
         {
             if (wasPinching)
             {
-                inputListener.PlaceTool();
+                if(inputListener.sessionState == InputListener.SessionState.ToolPlacement){
+                    inputListener.PlaceTool();
+                } else {
+                    //Release Marker;
+                    currentMarker.GetComponent<Rigidbody>().isKinematic = false;
+                    followTransformScript.isFollowing = false;
+                    currentMarker = null;
+                }
             }
             wasPinching = false;
             lineRenderer.enabled = false;
@@ -100,7 +114,17 @@ public class VRHandScript : MonoBehaviour
 
         wasPinching = true;
 
-        if(inputListener.sessionState != InputListener.SessionState.ToolPlacement) return;
+        if(inputListener.sessionState != InputListener.SessionState.ToolPlacement) {
+            if(holdingMarker){
+                return;
+            }
+            currentMarker = Instantiate(markerPrefab);
+            currentMarker.GetComponent<Rigidbody>().isKinematic = true;
+            followTransformScript = currentMarker.GetComponent<FollowTransformScript>();
+            followTransformScript.SetTransformToFollow(thisHand.PointerPose);
+            followTransformScript.isFollowing = true;
+            return;
+        };
 
         var pinchTransform = thisHand.PointerPose;
         var ray = new Ray(pinchTransform.position, pinchTransform.forward);
