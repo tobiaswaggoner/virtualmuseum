@@ -27,8 +27,9 @@ public class PersonalUIScript : MonoBehaviour
 
     IEnumerator AdjustMenu(){
         float t = 0;
+        Vector3 startPosition =  transform.position;
         while (t <= 1){
-            transform.position = Vector3.Lerp(transform.position, targetPosition, t);
+            transform.position = Vector3.Lerp(startPosition, targetPosition, t);
             t += Time.deltaTime;
         }
         yield return null;
