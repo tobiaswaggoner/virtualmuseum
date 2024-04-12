@@ -7,6 +7,6 @@ public class ActivateTextConverter : MonoBehaviour
     public CSVInterpreter cSVInterpreter;
     void OnTriggerEnter(Collider other)
     {
-      cSVInterpreter.CalculateStuff();   
+      //cSVInterpreter.CalculateStuff();   
     }
 }

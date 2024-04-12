@@ -37,7 +37,7 @@ public class VRHandScript : MonoBehaviour
                 ///code for enabling and showing Menu
                 if(personalUICoroutine.Equals(null)){
                     ///Coroutine activates PersonalMenu after a second
-                    personalUICoroutine = StartCoroutine(PersonalSystemGesture());
+                    // personalUICoroutine = StartCoroutine(PersonalSystemGesture());
                 }
             }
         } else {
@@ -80,59 +80,69 @@ public class VRHandScript : MonoBehaviour
             yield return new WaitForSeconds(1f);
         }
     }
-    
+
 
     ///------------------------------------------------------------------------------------------------------------------------------------
     ///helper functions and debugging -----------------------------------------------------------------------------------------------------
     ///------------------------------------------------------------------------------------------------------------------------------------
-    
+
     /// <summary>
     /// Tries to detect if this hand is pinching and displays Rays according to strength of the pinch
     /// </summary>
     /// <returns> The current index tip position if pinch strength is bigger than 0.9f </returns>
-    private void DetectPinch(){
+    private void DetectPinch()
+    {
         bool isIndexFingerPinching = thisHand.GetFingerIsPinching(HandFinger.Index);
         TrackingConfidence confidence = thisHand.GetFingerConfidence(HandFinger.Index);
 
-        if (!isIndexFingerPinching || confidence != TrackingConfidence.High)
+        if (!isIndexFingerPinching)
         {
+            // Pinch released?
             if (wasPinching)
             {
-                if(inputListener.sessionState == InputListener.SessionState.ToolPlacement){
+                if (inputListener.sessionState == InputListener.SessionState.ToolPlacement)
+                {
+                    // Set the table
                     inputListener.PlaceTool();
-                } else {
-                    //Release Marker;
-                    currentMarker.GetComponent<Rigidbody>().isKinematic = false;
-                    followTransformScript.isFollowing = false;
-                    currentMarker = null;
+                }
+                else
+                {
+                    //Release the Marker;
+                    ReleaseMarker();
                 }
             }
+
             wasPinching = false;
             lineRenderer.enabled = false;
             return;
         }
 
-        wasPinching = true;
+        if (isIndexFingerPinching && confidence == TrackingConfidence.High)
+        {
+            {
+                wasPinching = true;
 
-        if(inputListener.sessionState != InputListener.SessionState.ToolPlacement) {
-            if(holdingMarker){
-                return;
+                if (inputListener.sessionState != InputListener.SessionState.ToolPlacement && !holdingMarker)
+                {
+                    CreateMarker();
+                }
+                else if (inputListener.sessionState == InputListener.SessionState.ToolPlacement)
+                {
+                    MoveTable();
+                }
             }
-            currentMarker = Instantiate(markerPrefab);
-            currentMarker.GetComponent<Rigidbody>().isKinematic = true;
-            followTransformScript = currentMarker.GetComponent<FollowTransformScript>();
-            followTransformScript.SetTransformToFollow(thisHand.PointerPose);
-            followTransformScript.isFollowing = true;
-            return;
-        };
+        }
+    }
 
+    private void MoveTable()
+    {
         var pinchTransform = thisHand.PointerPose;
         var ray = new Ray(pinchTransform.position, pinchTransform.forward);
         Physics.Raycast(ray, out RaycastHit hit);
 
         Color color;
-        
-        if(hit.transform.gameObject.name=="TestFloor")
+
+        if (hit.transform.gameObject.name == "TestFloor")
         {
             color = Color.green;
             inputListener.ActivateGhost();
@@ -143,8 +153,32 @@ public class VRHandScript : MonoBehaviour
             color = Color.gray;
             inputListener.DeactivateGhost();
         }
-        DisplayRayFromPinchPosition(thisHand.PointerPose, color);
 
+        DisplayRayFromPinchPosition(thisHand.PointerPose, color);
+    }
+
+    private void CreateMarker()
+    {
+        if (currentMarker is not null || holdingMarker) return;
+
+        currentMarker = Instantiate(markerPrefab);
+        currentMarker.GetComponent<Rigidbody>().isKinematic = true;
+
+        followTransformScript = currentMarker.GetComponent<FollowTransformScript>();
+        followTransformScript.SetTransformToFollow(thisHand.PointerPose);
+        followTransformScript.isFollowing = true;
+
+        holdingMarker = true;
+    }
+
+    private void ReleaseMarker()
+    {
+        if (currentMarker is null || holdingMarker==false) return;
+        followTransformScript = currentMarker.GetComponent<FollowTransformScript>();
+        followTransformScript.isFollowing = false;
+        currentMarker.GetComponent<Rigidbody>().isKinematic = false;
+        currentMarker = null;
+        holdingMarker= false;
     }
 
     /// <summary>

@@ -1587,7 +1587,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44bff400ff68d96429f6f09764ee6607, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerPrefab: {fileID: 0}
+  markerPrefab: {fileID: 2695565502528544082, guid: bb6673672eab3b145b7d6181d17ebecb, type: 3}
   thisHand: {fileID: 1228273827}
   lineRenderer: {fileID: 1228273820}
 --- !u!114 &1228273827 stripped
@@ -2030,7 +2030,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1550973999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2534,7 +2534,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1740759825
 Transform:
   m_ObjectHideFlags: 0
