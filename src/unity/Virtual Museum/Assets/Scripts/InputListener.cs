@@ -51,7 +51,6 @@ public class InputListener : MonoBehaviour
 
     void Update()
     {
-        
         ///Test function for displaying a ghost table at potential placement point 
         if(sessionState.Equals(SessionState.ToolPlacement) && menuActive){
             if(!ghostSpawned) {

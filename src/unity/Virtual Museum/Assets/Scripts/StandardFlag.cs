@@ -25,4 +25,9 @@ public class StandardFlag : IFlag
         this.info = info;
         this.flagColor = flagColor;
     }
+
+    public void SetColor(Color color){
+        transform.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+        flagColor = color;
+    }
 }

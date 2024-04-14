@@ -35,9 +35,19 @@ public class CSVInterpreter : MonoBehaviour
 
     public bool calculatedStuff = false;
 
+    // TEST ----------------------
+    int testPeriod = 704;
+    // TEST ----------------------
+
     // Update is called once per frame
     void Update()
     {
+        //TEST -----------------------------------
+        if(Input.GetKeyDown(KeyCode.Return)){
+            DisplayFromPeriod(testPeriod);
+            testPeriod ++;
+        }
+        //TEST -----------------------------------
         if(!calculatedStuff) return;
         DrawMapOutline();
         DrawPointsOnMap();
@@ -155,5 +165,19 @@ public class CSVInterpreter : MonoBehaviour
 
         calculatedStuff = true;
         lineRenderer.enabled = true;
+    }
+    
+    public int currentPeriod = 704;
+    public void DisplayFromPeriod(int period = 704){
+        if(!erscheinungsMap.TryGetValue(period, out var v)) return;
+        for(int i = 0; i < erscheinungsMap[currentPeriod].Count; i ++){
+            erscheinungsMap[currentPeriod][i].SetColor(Color.yellow);
+        }
+
+        for(int i = 0; i < erscheinungsMap[period].Count; i ++){
+            Debug.DrawRay(erscheinungsMap[period][i].transform.position, Vector3.up * 5);
+            erscheinungsMap[period][i].SetColor(Color.blue);
+        }
+        currentPeriod = period;
     }
 }
