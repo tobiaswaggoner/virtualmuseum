@@ -6,6 +6,7 @@ TagManager:
   tags:
   - PersonalUI
   - Table
+  - InputsAndLogic
   layers:
   - Default
   - TransparentFX

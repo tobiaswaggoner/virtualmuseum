@@ -6,6 +6,8 @@ using System;
 using Oculus.Interaction.Grab;
 using System.Linq;
 using Unity.VisualScripting;
+using System.Threading.Tasks;
+using UnityEditor.Build;
 
 public class CSVInterpreter : MonoBehaviour
 {
@@ -46,29 +48,38 @@ public class CSVInterpreter : MonoBehaviour
     }
 
     private void DrawMapOutline(){
-        float offsetZ = 3;
-        topLeftCorner = new Vector3(- desiredWidth / 2, desiredHeight / 2, offsetZ);
-        bottomRightCorner = new Vector3(desiredWidth / 2, - desiredHeight / 2, offsetZ);
-
         lineRenderer.SetPosition(0, topLeftCorner);
-        lineRenderer.SetPosition(1, new Vector3(bottomRightCorner.x, topLeftCorner.y, offsetZ));
+        lineRenderer.SetPosition(1, new Vector3(bottomRightCorner.x, bottomRightCorner.y, topLeftCorner.z));
         lineRenderer.SetPosition(2, bottomRightCorner);
-        lineRenderer.SetPosition(3, new Vector3(topLeftCorner.x, bottomRightCorner.y, offsetZ));
-
+        lineRenderer.SetPosition(3, new Vector3(topLeftCorner.x, bottomRightCorner.y, bottomRightCorner.z));
     }
 
+    int j = 0;
     private void DrawPointsOnMap(){
-        for(int i = 0; i < mapCoordinates.Count - 1; i ++){
-            
+        
+        for(int i = 0; i < mapCoordinates.Count; i ++){
+            j ++;
             float newX = topLeftCorner.x + mapCoordinates[i][0] * desiredWidth;
-            float newY = topLeftCorner.y - mapCoordinates[i][1] * desiredHeight;
+            float newZ = topLeftCorner.z - mapCoordinates[i][1] * desiredHeight;
+            //Raycast Down to get Y
+            Vector3 oldPos = new Vector3(newX, topLeftCorner.y, newZ);
+            Ray ray = new Ray(oldPos, Vector3.down);
+            Physics.Raycast(ray, out RaycastHit hit);
 
-            Vector3 newPosition = new Vector3(newX, newY, 2.9f);
+            Vector3 newPosition = hit.point;
             points[i].transform.position = newPosition;
         }
     }
 
-    public void CalculateStuff(){
+    public void UpdateDesiredCorners(Vector3 newTopLeft, Vector3 newBottomRight){
+        topLeftCorner = newTopLeft;
+        bottomRightCorner = newBottomRight;
+
+        desiredWidth = bottomRightCorner.x - topLeftCorner.x;
+        desiredHeight = topLeftCorner.z - bottomRightCorner.z;
+    }
+
+    public async Task CalculateStuff(){
         data = inputText.text.Split(new String[] {";" , "\n"}, System.StringSplitOptions.None);
         int j = 0;
         for(int i = 0; i < data.Length; i ++){
@@ -119,12 +130,14 @@ public class CSVInterpreter : MonoBehaviour
         Debug.Log("lowestX: " + lowestX + ", lowestY: " + lowestY);
         Debug.Log("highestX: " + highestX + ", highestY: " + highestY);
 
-        for (int i = 0; i < gPS.Count - 1; i ++){
+        for (int i = 0; i < gPS.Count; i ++){
             float mapX = (gPS[i][0] - lowestX) / (highestX - lowestX);
             float mapY = (gPS[i][1] - lowestY) / (highestY - lowestY);
             mapCoordinates.Add(new float[2]{mapX, mapY});
         }
 
         calculatedStuff = true;
+        lineRenderer.enabled = true;
+        DrawPointsOnMap();
     }
 }

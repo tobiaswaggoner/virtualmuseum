@@ -51,7 +51,7 @@ public class InputListener : MonoBehaviour
 
     void Update()
     {
-        /*
+        
         ///Test function for displaying a ghost table at potential placement point 
         if(sessionState.Equals(SessionState.ToolPlacement) && menuActive){
             if(!ghostSpawned) {
@@ -68,7 +68,7 @@ public class InputListener : MonoBehaviour
                 placementPosition = hit.point;
             }
         }
-        */
+        
     }
 
 
@@ -109,6 +109,7 @@ public class InputListener : MonoBehaviour
             Debug.LogError("Sessionstate was in 'ToolPlacement' when tool was already placed \n Changed state to 'Interaction'");
             return;
         }
+
         ///If tool hasn't been placed, place tool at location and rotation of selection
         var newTool = Instantiate(Tools[toolIndex]);
         newTool.transform.position = placementPosition;
