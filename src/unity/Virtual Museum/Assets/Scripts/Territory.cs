@@ -6,10 +6,11 @@ using UnityEngine;
 ///A territory is made up of Borders. Each border defining the current borders during a specific point within the overall time span
 ///Includes start and end time, as well as definable position for information display to be able to represent a capital or center of the
 ///territory. Also includes Color for categorization and visual clarity
-public class Territory : MonoBehaviour, IFlag
+public class Territory : IFlag
 {
     public int startTime { get; set; }
     public int endTime { get; set; }
+    public Transform transform { get; set; }
     public Vector3 position { get; set; }
     public GameObject flagVisualTextComponent { get; set; }
     public GameObject flagVisualIndicator { get; set; }
@@ -33,11 +34,7 @@ public class Territory : MonoBehaviour, IFlag
         this.info = info;
     }
 
-    void Start()
-    {
-        GetFlagComponents();
-    }
-
+    /*
     public void CheckForTimeAdvance(float newTime){
         if(newTime > endTime || newTime < startTime){
             Debug.Log("New Time outside Timezone of Object: " + gameObject.name);
@@ -143,4 +140,5 @@ public class Territory : MonoBehaviour, IFlag
     }
 
     public void SetBorder(Border border){currentBorder = border;}
+    */
 }

@@ -29,13 +29,9 @@ public class CSVInterpreter : MonoBehaviour
 
     public TextAsset inputText;
     private string[] data;
-    public List<String> ersterwähnungen = new List<string>();
-    public List<String> ort = new List<string>();
-    public List<String> landkreis = new List<string>();
-    public List<String> gPSOld = new List<string>();
-    public List<float[]> gPS = new List<float[]>();
     public List<float[]> mapCoordinates = new List<float[]>();
     public List<GameObject> points = new List<GameObject>();
+    public Dictionary<int , List<StandardFlag>> erscheinungsMap = new Dictionary<int, List<StandardFlag>>();
 
     public bool calculatedStuff = false;
 
@@ -54,11 +50,8 @@ public class CSVInterpreter : MonoBehaviour
         lineRenderer.SetPosition(3, new Vector3(topLeftCorner.x, bottomRightCorner.y, bottomRightCorner.z));
     }
 
-    int j = 0;
     private void DrawPointsOnMap(){
-        
         for(int i = 0; i < mapCoordinates.Count; i ++){
-            j ++;
             float newX = topLeftCorner.x + mapCoordinates[i][0] * desiredWidth;
             float newZ = topLeftCorner.z - mapCoordinates[i][1] * desiredHeight;
             //Raycast Down to get Y
@@ -80,12 +73,18 @@ public class CSVInterpreter : MonoBehaviour
     }
 
     public async Task CalculateStuff(){
+        List<int> ersterwähnungen = new List<int>();
+        List<String> ort = new List<string>();
+        List<String> landkreis = new List<string>();
+        List<String> gPSOld = new List<string>();
+        List<float[]> gPS = new List<float[]>();
+
         data = inputText.text.Split(new String[] {";" , "\n"}, System.StringSplitOptions.None);
         int j = 0;
         for(int i = 0; i < data.Length; i ++){
             if(data[i] == "") continue;
             if(j == 0){
-                ersterwähnungen.Add(data[i]);
+                ersterwähnungen.Add(int.Parse(data[i]));
             } else if(j == 1){
                 ort.Add(data[i]);
             } else if(j == 2){
@@ -136,8 +135,25 @@ public class CSVInterpreter : MonoBehaviour
             mapCoordinates.Add(new float[2]{mapX, mapY});
         }
 
+        for(int i = 0; i < mapCoordinates.Count; i ++){
+            float newX = topLeftCorner.x + mapCoordinates[i][0] * desiredWidth;
+            float newZ = topLeftCorner.z - mapCoordinates[i][1] * desiredHeight;
+            //Raycast Down to get Y
+            Vector3 oldPos = new Vector3(newX, topLeftCorner.y, newZ);
+            Ray ray = new Ray(oldPos, Vector3.down);
+            Physics.Raycast(ray, out RaycastHit hit);
+
+            Vector3 newPosition = hit.point;
+            StandardFlag newFlag = new StandardFlag(ersterwähnungen[i], hit.point, points[i].transform, Color.red, ort[i]
+                                                    , "Landkreis: " + landkreis[i] + "\n GPS: " + gPSOld[i]);
+            if(!erscheinungsMap.TryGetValue(ersterwähnungen[i], out var v)){
+                erscheinungsMap[ersterwähnungen[i]] = new List<StandardFlag>();
+            }
+            erscheinungsMap[ersterwähnungen[i]].Add(newFlag);
+            points[i].transform.position = newPosition;
+        }
+
         calculatedStuff = true;
         lineRenderer.enabled = true;
-        DrawPointsOnMap();
     }
 }

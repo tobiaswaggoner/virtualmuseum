@@ -7,15 +7,15 @@ using UnityEngine;
 public interface IFlag
 {
     int startTime {get; set;}
-    int endTime {get; set;}
+    Transform transform {get; set;}
     Vector3 position {get; set;}
     GameObject flagVisualTextComponent {get; set;}
     GameObject flagVisualIndicator {get; set;}
     String header {get; set;}
     String info {get; set;}
 
-    void GetFlagComponents();
-    void DisplayInformation();
-    void StopDisplayingInformation();
-    void CheckForTimeAdvance(float newTime);
+    //void GetFlagComponents();
+    //void DisplayInformation();
+    //void StopDisplayingInformation();
+    //void CheckForTimeAdvance(float newTime);
 }
