@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 5763014205330762454}
   - component: {fileID: 9044235977390186717}
   - component: {fileID: 8034454661804936792}
+  - component: {fileID: 8860093659361923126}
+  - component: {fileID: 2590218277414929097}
   m_Layer: 6
   m_Name: Marker
   m_TagString: Untagged
@@ -161,3 +163,40 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   transformToFollow: {fileID: 0}
   isFollowing: 0
+--- !u!95 &8860093659361923126
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6262266410090804735}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 1e9492387994f0943bc0c07ca05a4175, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!111 &2590218277414929097
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6262266410090804735}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: c228aa99778cf754a87053dd3435e0b3, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: c228aa99778cf754a87053dd3435e0b3, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 0
+  m_AnimatePhysics: 0
+  m_CullingType: 0

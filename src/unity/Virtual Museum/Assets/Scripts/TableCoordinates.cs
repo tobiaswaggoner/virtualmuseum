@@ -10,7 +10,7 @@ public class TableCoordinates : MonoBehaviour
     // Start is called before the first frame update
     async void Start()
     {
-        await Task.Delay(8000);
+        await Task.Delay(5000);
         var temp = GetComponent<MeshFilter>();
         Vector3[] verts = temp.mesh.vertices;
         Vector4 globalOffsetToTable = transform.parent.position;

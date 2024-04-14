@@ -32,6 +32,9 @@ public class StandardFlag : IFlag
     }
 
     public void Activate(){
+        //wait for animation and play sound
+        Animator animator = transform.GetComponent<Animator>();
+        animator.Play("MarkerAnim");
         transform.GetComponent<MeshRenderer>().enabled = true;
         transform.GetComponent<Collider>().enabled = true;
     }
