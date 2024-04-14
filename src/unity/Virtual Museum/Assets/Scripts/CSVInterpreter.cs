@@ -11,7 +11,7 @@ using UnityEditor.Build;
 
 public class CSVInterpreter : MonoBehaviour
 {
-
+    public LayerMask maskToIgnore;
     public float edgeBuffer = 0.001f;
     public float lowestX = 0;
     public float lowestY = 0;
@@ -67,7 +67,7 @@ public class CSVInterpreter : MonoBehaviour
             //Raycast Down to get Y
             Vector3 oldPos = new Vector3(newX, topLeftCorner.y, newZ);
             Ray ray = new Ray(oldPos, Vector3.down);
-            Physics.Raycast(ray, out RaycastHit hit);
+            Physics.Raycast(ray, out RaycastHit hit, 5f, ~maskToIgnore);
 
             Vector3 newPosition = hit.point;
             points[i].transform.position = newPosition;
@@ -151,7 +151,7 @@ public class CSVInterpreter : MonoBehaviour
             //Raycast Down to get Y
             Vector3 oldPos = new Vector3(newX, topLeftCorner.y, newZ);
             Ray ray = new Ray(oldPos, Vector3.down);
-            Physics.Raycast(ray, out RaycastHit hit);
+            Physics.Raycast(ray, out RaycastHit hit, 5f, ~maskToIgnore);
 
             Vector3 newPosition = hit.point;
             StandardFlag newFlag = new StandardFlag(ersterwähnungen[i], hit.point, points[i].transform, Color.red, ort[i]
@@ -159,6 +159,7 @@ public class CSVInterpreter : MonoBehaviour
             if(!erscheinungsMap.TryGetValue(ersterwähnungen[i], out var v)){
                 erscheinungsMap[ersterwähnungen[i]] = new List<StandardFlag>();
             }
+            newFlag.transform.GetComponent<MeshRenderer>().enabled = false;
             erscheinungsMap[ersterwähnungen[i]].Add(newFlag);
             points[i].transform.position = newPosition;
         }
@@ -168,15 +169,20 @@ public class CSVInterpreter : MonoBehaviour
     }
     
     public int currentPeriod = 704;
-    public void DisplayFromPeriod(int period = 704){
+    public void DisplayFromPeriod(int period = 704, bool up = true){
         if(!erscheinungsMap.TryGetValue(period, out var v)) return;
         for(int i = 0; i < erscheinungsMap[currentPeriod].Count; i ++){
-            erscheinungsMap[currentPeriod][i].SetColor(Color.yellow);
+            StandardFlag currentFlag = erscheinungsMap[currentPeriod][i];
+            if(up){
+                currentFlag.SetColor(Color.yellow);    
+            } else {
+                currentFlag.Deactivate();
+            }
         }
 
         for(int i = 0; i < erscheinungsMap[period].Count; i ++){
-            Debug.DrawRay(erscheinungsMap[period][i].transform.position, Vector3.up * 5);
-            erscheinungsMap[period][i].SetColor(Color.blue);
+            StandardFlag currentFlag = erscheinungsMap[period][i];
+            currentFlag.Activate();
         }
         currentPeriod = period;
     }

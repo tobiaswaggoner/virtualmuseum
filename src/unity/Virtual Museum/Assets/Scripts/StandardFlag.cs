@@ -30,4 +30,14 @@ public class StandardFlag : IFlag
         transform.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
         flagColor = color;
     }
+
+    public void Activate(){
+        transform.GetComponent<MeshRenderer>().enabled = true;
+        transform.GetComponent<Collider>().enabled = true;
+    }
+
+    public void Deactivate(){
+        transform.GetComponent<MeshRenderer>().enabled = true;
+        transform.GetComponent<Collider>().enabled = true;  
+    }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using OVR.OpenVR;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ public class TableCoordinates : MonoBehaviour
     // Start is called before the first frame update
     async void Start()
     {
+        await Task.Delay(8000);
         var temp = GetComponent<MeshFilter>();
         Vector3[] verts = temp.mesh.vertices;
         Vector4 globalOffsetToTable = transform.parent.position;

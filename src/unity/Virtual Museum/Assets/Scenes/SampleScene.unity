@@ -1082,6 +1082,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9daae63cf8bf1d946a8f59f1177b9920, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maskToIgnore:
+    serializedVersion: 2
+    m_Bits: 64
   edgeBuffer: 0.001
   lowestX: 0
   lowestY: 0
@@ -1092,12 +1095,9 @@ MonoBehaviour:
   lineRenderer: {fileID: 951632371}
   pointPrefab: {fileID: 6262266410090804735, guid: 0b946e4953b1ab54db5bfb1c091db453, type: 3}
   inputText: {fileID: 4900000, guid: 33a54012c07400448a5f0393ddcd71c5, type: 3}
-  "ersterw\xE4hnungen": []
-  ort: []
-  landkreis: []
-  gPSOld: []
   points: []
   calculatedStuff: 0
+  currentPeriod: 704
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
