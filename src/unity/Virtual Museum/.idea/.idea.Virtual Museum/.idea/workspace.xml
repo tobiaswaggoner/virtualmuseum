@@ -5,13 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6cd77b99-0a2b-4cb0-ad92-01af511e619b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/ActivateTextConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ActivateTextConverter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Table.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Table.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/SampleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/SampleScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/FollowTransformScript.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/FollowTransformScript.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/MarkerFallScript.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/MarkerFallScript.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/VRHandScript.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/VRHandScript.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
     </list>
     <list id="1b53e0ad-582e-48a6-80f4-34eec73f6a74" name="Fix" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -117,6 +112,7 @@
       <workItem from="1712478452203" duration="1619000" />
       <workItem from="1712481199432" duration="8155000" />
       <workItem from="1712824326888" duration="5964000" />
+      <workItem from="1713632522943" duration="843000" />
     </task>
     <task id="LOCAL-00001">
       <option name="closed" value="true" />
