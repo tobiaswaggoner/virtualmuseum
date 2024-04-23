@@ -7,6 +7,7 @@ TagManager:
   - PersonalUI
   - Table
   - InputsAndLogic
+  - Marker
   layers:
   - Default
   - TransparentFX

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Oculus.Platform;
 using Oculus.Platform.Models;
 using UnityEngine;
 
@@ -34,7 +35,9 @@ public class StandardFlag : IFlag
     public void Activate(){
         //wait for animation and play sound
         Animator animator = transform.GetComponent<Animator>();
-        animator.Play("MarkerAnim");
+        AudioSource audioSource = transform.GetComponent<AudioSource>();
+        audioSource.Play();
+        animator.Play("Base Layer.MarkerAnim", 0, 0);
         transform.GetComponent<MeshRenderer>().enabled = true;
         transform.GetComponent<Collider>().enabled = true;
     }
@@ -42,5 +45,19 @@ public class StandardFlag : IFlag
     public void Deactivate(){
         transform.GetComponent<MeshRenderer>().enabled = true;
         transform.GetComponent<Collider>().enabled = true;  
+    }
+
+    public void ShowText(){
+        var textTransform = transform.GetChild(0); 
+        if(!textTransform.Equals(null)){
+            textTransform.gameObject.SetActive(true);
+        }
+    }
+
+    public void HideText(){
+        var textTransform = transform.GetChild(0); 
+        if(!textTransform.Equals(null)){
+            textTransform.gameObject.SetActive(false);
+        }
     }
 }

@@ -45,12 +45,40 @@ public class CSVInterpreter : MonoBehaviour
         //TEST -----------------------------------
         if(Input.GetKeyDown(KeyCode.Return)){
             DisplayFromPeriod(testPeriod);
-            testPeriod ++;
+            testPeriod = getNextPeriod(testPeriod);
         }
         //TEST -----------------------------------
         if(!calculatedStuff) return;
         DrawMapOutline();
         DrawPointsOnMap();
+    }
+
+    public int getNextPeriod(int currentPeriod){
+        int newPeriod = currentPeriod;
+        newPeriod ++;
+        while(!erscheinungsMap.TryGetValue(newPeriod, out var v)) {
+            if(newPeriod < 2100){
+                newPeriod ++;
+            } else {
+                newPeriod = currentPeriod;
+                Debug.LogError("Tried to get period at a point past dataset.\n No period higher than " + currentPeriod + " exists");
+            }
+        }
+        return newPeriod;
+    }
+
+    private int getLastPeriod(){
+        int newPeriod = currentPeriod;
+        newPeriod --;
+        while(!erscheinungsMap.TryGetValue(newPeriod, out var v)) {
+            if(newPeriod < 500){
+                newPeriod --;
+            } else {
+                newPeriod = currentPeriod;
+                Debug.LogError("Tried to get period at a point past dataset.\n No period higher than " + currentPeriod + " exists");
+            }
+        }
+        return newPeriod;
     }
 
     private void DrawMapOutline(){
@@ -180,10 +208,16 @@ public class CSVInterpreter : MonoBehaviour
             }
         }
 
-        for(int i = 0; i < erscheinungsMap[period].Count; i ++){
-            StandardFlag currentFlag = erscheinungsMap[period][i];
-            currentFlag.Activate();
-        }
+        StartCoroutine(DisplayMarkersWithDelay(erscheinungsMap[period], 0.1f));
         currentPeriod = period;
+    }
+
+    private IEnumerator DisplayMarkersWithDelay(List<StandardFlag> markers, float delay){
+        for(int i = 0; i < markers.Count; i ++){
+            StandardFlag currentFlag = markers[i];
+            currentFlag.Activate();
+            yield return new WaitForSeconds(delay);
+        }
+        yield return null;
     }
 }

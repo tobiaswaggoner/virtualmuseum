@@ -86,10 +86,11 @@ public class VRHandScript : MonoBehaviour
     ///helper functions and debugging -----------------------------------------------------------------------------------------------------
     ///------------------------------------------------------------------------------------------------------------------------------------
 
+    StandardFlag selectedMarker;
     /// <summary>
     /// Tries to detect if this hand is pinching and displays Rays according to strength of the pinch
     /// </summary>
-    /// <returns> The current index tip position if pinch strength is bigger than 0.9f </returns>
+    /// <returns> The current index tip position if pinch strength is bigger than 0.9f </returns> 
     private void DetectPinch()
     {
         bool isIndexFingerPinching = thisHand.GetFingerIsPinching(HandFinger.Index);
@@ -107,8 +108,14 @@ public class VRHandScript : MonoBehaviour
                 }
                 else
                 {
+                    /*
                     //Release the Marker;
                     ReleaseMarker();
+                    */
+                    if(!selectedMarker.Equals(null)){
+                        //sets the 
+                        selectedMarker.ShowText();
+                    }
                 }
             }
 
@@ -119,19 +126,36 @@ public class VRHandScript : MonoBehaviour
 
         if (isIndexFingerPinching && confidence == TrackingConfidence.High)
         {
-            {
-                wasPinching = true;
+            wasPinching = true;
 
-                if (inputListener.sessionState != InputListener.SessionState.ToolPlacement && !holdingMarker)
-                {
-                    CreateMarker();
-                }
-                else if (inputListener.sessionState == InputListener.SessionState.ToolPlacement)
-                {
-                    MoveTable();
+            if (inputListener.sessionState != InputListener.SessionState.ToolPlacement && !holdingMarker)
+            {
+                /*
+                CreateMarker();
+                */
+
+                Ray ray = new Ray(thisHand.PointerPose.position, thisHand.PointerPose.forward);
+                Physics.Raycast(ray, out RaycastHit hit);
+                Color color = Color.gray;
+                var test = hit.transform;
+                if(!test.Equals(null)){
+                    if(hit.transform.CompareTag("Marker")){
+                        if(!selectedMarker.Equals(null)){
+                            selectedMarker.HideText();
+                        }
+                        
+                        color = Color.green;
+                        selectedMarker = hit.transform.GetComponent<StandardFlag>();
+                        selectedMarker.Activate();
+                        DisplayRayFromPinchPosition(thisHand.PointerPose, color);
+                    }
                 }
             }
-        }
+            else if (inputListener.sessionState == InputListener.SessionState.ToolPlacement)
+            {
+                MoveTable();
+            }
+        }   
     }
 
     private void MoveTable()
