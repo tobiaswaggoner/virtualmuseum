@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Oculus.Platform;
 using Oculus.Platform.Models;
+using TMPro;
 using UnityEngine;
 
 ///A standard flag for displaying information about a point of interest
@@ -17,6 +18,8 @@ public class StandardFlag : IFlag
     public string header { get; set; }
     public string info { get; set; }
     Color flagColor;
+
+    private bool textIsSet = false;
 
     public StandardFlag(int startTime, Vector3 position, Transform transform, Color flagColor, string header = "test", string info = "no new info"){
         this.startTime = startTime;
@@ -48,6 +51,7 @@ public class StandardFlag : IFlag
     }
 
     public void ShowText(){
+        if(!textIsSet) SetText();
         var textTransform = transform.GetChild(0); 
         if(!textTransform.Equals(null)){
             textTransform.gameObject.SetActive(true);
@@ -59,5 +63,10 @@ public class StandardFlag : IFlag
         if(!textTransform.Equals(null)){
             textTransform.gameObject.SetActive(false);
         }
+    }
+
+    private void SetText(){
+        transform.GetChild(0).GetChild(0).GetComponent<TMP_Text>().text = header;
+        textIsSet = true;
     }
 }
