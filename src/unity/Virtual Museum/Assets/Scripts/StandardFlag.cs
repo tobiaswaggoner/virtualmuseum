@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Unity.VisualStudio.Editor;
 using Oculus.Platform;
 using Oculus.Platform.Models;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 ///A standard flag for displaying information about a point of interest
 ///Has start and endTime for defining first mention and last seen documentation of the point of interest as well as Color attribute for 
@@ -28,10 +30,11 @@ public class StandardFlag : IFlag
         this.header = header;
         this.info = info;
         this.flagColor = flagColor;
+        this.Deactivate();
     }
 
     public void SetColor(Color color){
-        transform.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+        transform.GetComponent<UnityEngine.UI.Image>().color = color;
         flagColor = color;
     }
 
@@ -41,14 +44,12 @@ public class StandardFlag : IFlag
         AudioSource audioSource = transform.GetComponent<AudioSource>();
         audioSource.Play();
         animator.Play("Base Layer.MarkerAnim", 0, 0);
-        transform.GetComponent<MeshRenderer>().enabled = true;
-        transform.GetComponent<Collider>().enabled = true;
+        transform.GetComponent<UnityEngine.UI.Image>().enabled = true;
         SetColor(Color.red);
     }
 
     public void Deactivate(){
-        transform.GetComponent<MeshRenderer>().enabled = false;
-        transform.GetComponent<Collider>().enabled = false;
+        transform.GetComponent<UnityEngine.UI.Image>().enabled = false;
     }
 
     public void ShowText(){

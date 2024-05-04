@@ -41,15 +41,16 @@ public class CSVInterpreter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+        if(!calculatedStuff) return;
         //TEST -----------------------------------
         if(Input.GetKeyDown(KeyCode.Return)){
             DisplayFromPeriod(testPeriod);
             testPeriod = getNextPeriod(testPeriod);
         }
         //TEST -----------------------------------
-        if(!calculatedStuff) return;
         DrawMapOutline();
-        DrawPointsOnMap();
+        //DrawPointsOnMap();
     }
 
     public int getNextPeriod(int currentPeriod){
@@ -194,13 +195,12 @@ public class CSVInterpreter : MonoBehaviour
             Ray ray = new Ray(oldPos, Vector3.down);
             Physics.Raycast(ray, out RaycastHit hit, 5f, ~maskToIgnore);
 
-            Vector3 newPosition = hit.point;
+            Vector3 newPosition = hit.point + new Vector3(0, 0.1f, 0);
             StandardFlag newFlag = new StandardFlag(ersterwähnungen[i], hit.point, points[i].transform, Color.red, ort[i]
                                                     , "Landkreis: " + landkreis[i] + "\n GPS: " + gPSOld[i]);
             if(!erscheinungsMap.TryGetValue(ersterwähnungen[i], out var v)){
                 erscheinungsMap[ersterwähnungen[i]] = new List<StandardFlag>();
             }
-            newFlag.transform.GetComponent<MeshRenderer>().enabled = false;
             erscheinungsMap[ersterwähnungen[i]].Add(newFlag);
             points[i].transform.position = newPosition;
         }
