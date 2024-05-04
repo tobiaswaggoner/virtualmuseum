@@ -7,7 +7,6 @@ using Oculus.Interaction.Grab;
 using System.Linq;
 using Unity.VisualScripting;
 using System.Threading.Tasks;
-using UnityEditor.Build;
 
 public class CSVInterpreter : MonoBehaviour
 {
@@ -36,7 +35,7 @@ public class CSVInterpreter : MonoBehaviour
     public bool calculatedStuff = false;
 
     // TEST ----------------------
-    int testPeriod = 704;
+    public int testPeriod = 704;
     // TEST ----------------------
 
     // Update is called once per frame
@@ -67,17 +66,31 @@ public class CSVInterpreter : MonoBehaviour
         return newPeriod;
     }
 
-    private int getLastPeriod(){
+    public int getLastPeriod(int currentPeriod, bool alsoActivate = true, bool deactivateNewest = true){
         int newPeriod = currentPeriod;
         newPeriod --;
+        
+        if(currentPeriod != 500 && deactivateNewest){
+            foreach(var p in erscheinungsMap[currentPeriod]){
+            p.Deactivate();
+        }
+        }
+        
+
         while(!erscheinungsMap.TryGetValue(newPeriod, out var v)) {
-            if(newPeriod < 500){
+            if(newPeriod > 500){
                 newPeriod --;
             } else {
                 newPeriod = currentPeriod;
                 Debug.LogError("Tried to get period at a point past dataset.\n No period higher than " + currentPeriod + " exists");
             }
         }
+        if(newPeriod != 500 && alsoActivate){
+            foreach(var p in erscheinungsMap[newPeriod]){
+                p.Activate();
+            }
+        }
+        
         return newPeriod;
     }
 

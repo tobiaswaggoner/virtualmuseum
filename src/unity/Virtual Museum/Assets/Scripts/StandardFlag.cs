@@ -43,11 +43,12 @@ public class StandardFlag : IFlag
         animator.Play("Base Layer.MarkerAnim", 0, 0);
         transform.GetComponent<MeshRenderer>().enabled = true;
         transform.GetComponent<Collider>().enabled = true;
+        SetColor(Color.red);
     }
 
     public void Deactivate(){
-        transform.GetComponent<MeshRenderer>().enabled = true;
-        transform.GetComponent<Collider>().enabled = true;  
+        transform.GetComponent<MeshRenderer>().enabled = false;
+        transform.GetComponent<Collider>().enabled = false;
     }
 
     public void ShowText(){
