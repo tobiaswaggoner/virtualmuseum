@@ -8,6 +8,7 @@ using static OVRHand;
 
 public class GeneralHandScript : MonoBehaviour
 {
+    
     [SerializeField] OVRHand thisHand;
     bool handsDetected = false;
 
