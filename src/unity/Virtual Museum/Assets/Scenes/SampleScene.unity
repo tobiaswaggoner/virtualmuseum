@@ -1141,7 +1141,7 @@ MonoBehaviour:
   desiredWidth: 6
   desiredHeight: 3
   lineRenderer: {fileID: 951632371}
-  pointPrefab: {fileID: 2695565502528544082, guid: bb6673672eab3b145b7d6181d17ebecb, type: 3}
+  pointPrefab: {fileID: 2695565502528544082, guid: f122016623411fc409ebb51b3b53fe4d, type: 3}
   inputText: {fileID: 4900000, guid: 33a54012c07400448a5f0393ddcd71c5, type: 3}
   points: []
   calculatedStuff: 0
