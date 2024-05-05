@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using Microsoft.Unity.VisualStudio.Editor;
 using Oculus.Platform;
 using Oculus.Platform.Models;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 ///A standard flag for displaying information about a point of interest
@@ -22,6 +24,8 @@ public class StandardFlag : IFlag
     Color flagColor;
     public Transform visualComponentTransform;
     public Transform textTransform;
+    public PokeEventInterpreter pokeEventInterpreter;
+    private UnityAction<bool> pokedListener;
 
     private bool textIsSet = false;
 
@@ -34,7 +38,18 @@ public class StandardFlag : IFlag
         this.flagColor = flagColor;
         this.visualComponentTransform = transform.GetChild(0);
         this.textTransform = transform.GetChild(1);
+        this.pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
+        pokedListener = new UnityAction<bool>(EventCallback);
+        pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
         this.Deactivate();
+    }
+
+    private void EventCallback(bool b){
+        if(b){
+            ShowText();
+        } else {
+            HideText();
+        }
     }
 
     public void SetColor(Color color){

@@ -71,7 +71,7 @@ public class TimeGestureTest : MonoBehaviour
         }
 
         void SelectFirstFlag(){
-           interpreter.erscheinungsMap[interpreter.currentPeriod][0].ShowText();
+           interpreter.erscheinungsMap[interpreter.currentPeriod][0].pokeEventInterpreter.Selected();
         }
     }
 
