@@ -20,6 +20,8 @@ public class StandardFlag : IFlag
     public string header { get; set; }
     public string info { get; set; }
     Color flagColor;
+    public Transform visualComponentTransform;
+    public Transform textTransform;
 
     private bool textIsSet = false;
 
@@ -30,45 +32,44 @@ public class StandardFlag : IFlag
         this.header = header;
         this.info = info;
         this.flagColor = flagColor;
+        this.visualComponentTransform = transform.GetChild(0);
+        this.textTransform = transform.GetChild(1);
         this.Deactivate();
     }
 
     public void SetColor(Color color){
-        transform.GetComponent<UnityEngine.UI.Image>().color = color;
+        visualComponentTransform.GetChild(0).GetComponent<MeshRenderer>().material.color = color;
         flagColor = color;
     }
 
     public void Activate(){
         //wait for animation and play sound
-        Animator animator = transform.GetComponent<Animator>();
-        AudioSource audioSource = transform.GetComponent<AudioSource>();
+        visualComponentTransform.gameObject.SetActive(true);
+        Animator animator = visualComponentTransform.GetComponent<Animator>();
+        AudioSource audioSource = visualComponentTransform.GetComponent<AudioSource>();
         audioSource.Play();
         animator.Play("Base Layer.MarkerAnim", 0, 0);
-        transform.GetComponent<UnityEngine.UI.Image>().enabled = true;
         SetColor(Color.red);
     }
 
     public void Deactivate(){
-        transform.GetComponent<UnityEngine.UI.Image>().enabled = false;
+        visualComponentTransform.gameObject.SetActive(false);
     }
 
     public void ShowText(){
         if(!textIsSet) SetText();
-        var textTransform = transform.GetChild(0); 
-        if(!textTransform.Equals(null)){
-            textTransform.gameObject.SetActive(true);
-        }
+        textTransform.gameObject.SetActive(true);
     }
 
     public void HideText(){
-        var textTransform = transform.GetChild(0); 
+        var textTransform = transform.GetChild(1); 
         if(!textTransform.Equals(null)){
             textTransform.gameObject.SetActive(false);
         }
     }
 
     private void SetText(){
-        transform.GetChild(0).GetChild(0).GetComponent<TMP_Text>().text = header;
+        textTransform.GetChild(0).GetComponent<TMP_Text>().text = header;
         textIsSet = true;
     }
 }
