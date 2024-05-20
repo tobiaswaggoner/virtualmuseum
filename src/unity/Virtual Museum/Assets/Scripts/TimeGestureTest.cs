@@ -45,13 +45,12 @@ public class TimeGestureTest : MonoBehaviour
 
             //check if difference is in the right direction
             if(CalculateSimilarity(startingRight, direction) > 0.6 && distance > 0.5){
-                interpreter.DisplayFromPeriod(interpreter.testPeriod);
-                interpreter.testPeriod = interpreter.getNextPeriod(interpreter.testPeriod);
+                StandardFlag.NextPeriod();
                 leftHandTransform.GetComponent<MeshRenderer>().material.color = Color.red;
             } else if(CalculateSimilarity(startingRight, direction) > 0.4){leftHandTransform.GetComponent<MeshRenderer>().material.color = Color.gray;}
 
             if(CalculateSimilarity(startingRight, direction) < 0.4 && distance > 0.5){
-                interpreter.testPeriod = interpreter.getLastPeriod(interpreter.testPeriod);
+                StandardFlag.LastPeriod();
                 leftHandTransform.GetComponent<MeshRenderer>().material.color = Color.blue;
             }
         }

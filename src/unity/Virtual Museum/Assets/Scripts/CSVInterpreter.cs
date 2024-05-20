@@ -45,8 +45,7 @@ public class CSVInterpreter : MonoBehaviour
         if(!calculatedStuff) return;
         //TEST -----------------------------------
         if(Input.GetKeyDown(KeyCode.Return)){
-            DisplayFromPeriod(testPeriod);
-            testPeriod = getNextPeriod(testPeriod);
+            StandardFlag.NextPeriod();
         }
         //TEST -----------------------------------
         DrawMapOutline();

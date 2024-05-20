@@ -1,13 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using Microsoft.Unity.VisualStudio.Editor;
-using Oculus.Platform;
-using Oculus.Platform.Models;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
+using System.Linq;
+using UnityEngine.Timeline;
 
 ///A standard flag for displaying information about a point of interest
 ///Has start and endTime for defining first mention and last seen documentation of the point of interest as well as Color attribute for 
@@ -15,6 +12,8 @@ using UnityEngine.UI;
 public class StandardFlag : IFlag
 {
     public int startTime { get; set; }
+    static public int currentTime = 700; //704 is the date of the first city
+    public static List<StandardFlag> flags = new List<StandardFlag>();
     public Transform transform {get; set;}
     public Vector3 position { get; set; }
     public GameObject flagVisualTextComponent { get; set; }
@@ -41,8 +40,61 @@ public class StandardFlag : IFlag
         this.pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
         pokedListener = new UnityAction<bool>(EventCallback);
         pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
+        flags.Add(this);
         this.Deactivate();
     }
+
+    static public bool NextPeriod(){
+        //nullable variable for storing potential next period
+        int? nextTime = flags
+            .Where(flag => flag.startTime > currentTime)
+            .Select(flag => (int?)flag.startTime)
+            .OrderBy(time => time)
+            .FirstOrDefault();
+
+        if(nextTime.HasValue){
+            currentTime = nextTime.Value;
+            DisplayMarkersOfPeriod(currentTime);
+            return true;
+        }
+        return false;
+    }
+
+    static public bool LastPeriod(){
+        //nullable variable for storing potential next period
+        int? lastTime = flags
+            .Where(flag => flag.startTime < currentTime)
+            .Select(flag => (int?)flag.startTime)
+            .OrderByDescending(time => time)
+            .FirstOrDefault();
+
+        if(lastTime.HasValue){
+            currentTime = lastTime.Value;
+            DisplayMarkersOfPeriod(currentTime);
+            return true;
+        }
+        return false;
+    }
+
+    static public void DisplayMarkersOfPeriod(int period){
+        flags
+        .Where(flag => flag.startTime == period)
+        .ToList()
+        .ForEach(flag => flag.Activate());
+
+        flags.ForEach(flag => flag.UpdateColor());
+    }
+
+    //Change color according to distance between currentTime and startTime
+    public void UpdateColor(){
+        //Flag should be more red when fresher
+        float r = 255 - (startTime - currentTime) / 4;
+        float g = 0;
+        float b = (startTime - currentTime) / 4;
+        Color newColor = new Color(r,g,b);
+        visualComponentTransform.GetChild(0).GetComponent<MeshRenderer>().material.color = newColor;
+        flagColor = newColor;
+        }
 
     private void EventCallback(bool b){
         if(b){
@@ -87,4 +139,5 @@ public class StandardFlag : IFlag
         textTransform.GetChild(0).GetComponent<TMP_Text>().text = header;
         textIsSet = true;
     }
+
 }

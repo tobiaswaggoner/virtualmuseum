@@ -32,17 +32,7 @@ public class LeftVRHandScript : MonoBehaviour
         timer += Time.deltaTime;
         if(thisHand.IsSystemGestureInProgress){
             if(!thisHand.IsDominantHand){
-                ///display the next period
-                if(timer > 0.4){
-                    cSVInterpreter.DisplayFromPeriod(testPeriod);
-                    testPeriod = cSVInterpreter.getNextPeriod(testPeriod);
-                    timer = 0;
-                }
-                
-                if(personalUICoroutine.Equals(null)){
-                    ///Coroutine activates PersonalMenu after a second
-                    // personalUICoroutine = StartCoroutine(PersonalSystemGesture());
-                }
+                //implement custom left handed system gesture
             }
         } else {
             DetectPinch(); 
