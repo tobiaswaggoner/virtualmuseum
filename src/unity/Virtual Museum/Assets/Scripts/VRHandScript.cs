@@ -13,6 +13,7 @@ public class VRHandScript : MonoBehaviour
     [SerializeField] private LineRenderer lineRenderer;
     bool handsDetected = false;
     bool wasPinching = false;
+    [SerializeField] private LayerMask floorMask;
 
     private Coroutine personalUICoroutine;
 
@@ -116,48 +117,28 @@ public class VRHandScript : MonoBehaviour
         if (isIndexFingerPinching && confidence == TrackingConfidence.High)
         {
             wasPinching = true;
-
-            if (inputListener.sessionState == InputListener.SessionState.ToolPlacement)
-            {
-                MoveTable();
-            }
         }   
     }
-
-    bool switchvariable = false;
-    int switchCounter = 0;
     private void MoveTable()
     {
         var pinchTransform = thisHand.PointerPose;
         var ray = new Ray(pinchTransform.position, pinchTransform.forward);
-        Physics.Raycast(ray, out RaycastHit hit);
+        Physics.Raycast(ray, out RaycastHit hit, 100, ~floorMask);
         RaycastHit? raycastHit = hit;
 
         Color color;
 
         if (raycastHit.HasValue)
         {
-            Debug.Log("raycastHit: " + hit.transform.name);
-            if(!switchvariable)
-            {
-                switchvariable = true;
-                switchCounter ++;    
-            }
             color = Color.green;
             inputListener.ActivateGhost();
             inputListener.UpdateGhostPosition(hit.point);
         }
         else
         {
-            if(switchvariable)
-            {
-                switchvariable = false;
-                switchCounter ++;    
-            }
             color = Color.gray;
             inputListener.DeactivateGhost();
         }
-        Debug.Log("SW: " + switchCounter);
         DisplayRayFromPinchPosition(thisHand.PointerPose, color);
     }
 
