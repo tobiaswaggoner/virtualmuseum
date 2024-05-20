@@ -42,7 +42,7 @@ public class StandardFlag : IFlag
         pokedListener = new UnityAction<bool>(EventCallback);
         pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
         flags.Add(this);
-        this.Deactivate();
+        Deactivate();
     }
 
     static public bool NextPeriod(){
