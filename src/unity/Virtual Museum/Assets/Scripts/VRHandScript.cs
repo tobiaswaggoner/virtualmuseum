@@ -13,9 +13,6 @@ public class VRHandScript : MonoBehaviour
     [SerializeField] private LineRenderer lineRenderer;
     bool handsDetected = false;
     bool wasPinching = false;
-    [SerializeField] private LayerMask floorMask;
-
-    private Coroutine personalUICoroutine;
 
     private void Start()
     {
@@ -28,29 +25,10 @@ public class VRHandScript : MonoBehaviour
         if(!handsDetected) return;
         if(thisHand.IsSystemGestureInProgress){
             if(!thisHand.IsDominantHand){
-                ///code for enabling and showing Menu
-                if(personalUICoroutine.Equals(null)){
-                    ///Coroutine activates PersonalMenu after a second
-                    // personalUICoroutine = StartCoroutine(PersonalSystemGesture());
-                }
             }
         } else {
             DetectPinch(); 
         }
-    }
-
-    /// <summary>
-    /// Coroutine waits for a second before displaying personalUI
-    /// Only displays if person continues to hold gesture
-    /// </summary>
-    IEnumerator PersonalSystemGesture(){
-        ///here you could display some sort of loading progress
-        yield return new WaitForSeconds(1f);
-        ///if the gesture is not being held, don't show the menu
-        if(!thisHand.IsSystemGestureInProgress) StopCoroutine(personalUICoroutine);
-        ///code for enabling and showing Menu
-        GameObject.FindGameObjectsWithTag("PersonalUI").ToList().ForEach((g) => {g.GetComponent<Canvas>().enabled = true;});
-        yield return null;
     }
 
     ///<summary>
@@ -93,7 +71,7 @@ public class VRHandScript : MonoBehaviour
         if (!isIndexFingerPinching)
         {
             // Pinch released?
-            if (wasPinching)
+            if (wasPinching && thisHand.IsDominantHand)
             {
                 if (inputListener.sessionState == InputListener.SessionState.ToolPlacement)
                 {
@@ -114,32 +92,10 @@ public class VRHandScript : MonoBehaviour
             return;
         }
 
-        if (isIndexFingerPinching && confidence == TrackingConfidence.High)
+        if (isIndexFingerPinching && confidence == TrackingConfidence.High && thisHand.IsDominantHand)
         {
             wasPinching = true;
         }   
-    }
-    private void MoveTable()
-    {
-        var pinchTransform = thisHand.PointerPose;
-        var ray = new Ray(pinchTransform.position, pinchTransform.forward);
-        Physics.Raycast(ray, out RaycastHit hit, 100, ~floorMask);
-        RaycastHit? raycastHit = hit;
-
-        Color color;
-
-        if (raycastHit.HasValue)
-        {
-            color = Color.green;
-            inputListener.ActivateGhost();
-            inputListener.UpdateGhostPosition(hit.point);
-        }
-        else
-        {
-            color = Color.gray;
-            inputListener.DeactivateGhost();
-        }
-        DisplayRayFromPinchPosition(thisHand.PointerPose, color);
     }
 
     /// <summary>
