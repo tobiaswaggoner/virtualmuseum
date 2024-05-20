@@ -143,8 +143,6 @@ public class InputListener : MonoBehaviour
     {
         if (!ghostSpawned) return;
         if(currentGhost.activeSelf) currentGhost.SetActive(false);
-        currentGhost = null;
-        ghostSpawned = false;
     }
 
     ///<summary>

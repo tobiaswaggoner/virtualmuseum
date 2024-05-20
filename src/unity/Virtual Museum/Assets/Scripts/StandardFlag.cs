@@ -35,9 +35,10 @@ public class StandardFlag : IFlag
         this.header = header;
         this.info = info;
         this.flagColor = flagColor;
-        this.visualComponentTransform = transform.GetChild(0);
-        this.textTransform = transform.GetChild(1);
-        this.pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
+        
+        visualComponentTransform = transform.GetChild(0);
+        textTransform = transform.GetChild(1);
+        pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
         pokedListener = new UnityAction<bool>(EventCallback);
         pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
         flags.Add(this);

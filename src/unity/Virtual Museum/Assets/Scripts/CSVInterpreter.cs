@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System;
-using Oculus.Interaction.Grab;
 using System.Linq;
-using Unity.VisualScripting;
 using System.Threading.Tasks;
 
 public class CSVInterpreter : MonoBehaviour
@@ -19,10 +17,10 @@ public class CSVInterpreter : MonoBehaviour
 
     public float desiredWidth = 6;
     public float desiredHeight = 3;
-    private Vector3 topLeftCorner = new Vector3(0,0,0);
-    private Vector3 bottomRightCorner = new Vector3(0,0,0); 
+    private Vector3 topLeftCorner = Vector3.zero;
+    private Vector3 bottomRightCorner = Vector3.zero;
 
-    public LineRenderer lineRenderer = new LineRenderer();
+    public LineRenderer lineRenderer;
 
     public GameObject pointPrefab;
 
@@ -30,92 +28,33 @@ public class CSVInterpreter : MonoBehaviour
     private string[] data;
     public List<float[]> mapCoordinates = new List<float[]>();
     public List<GameObject> points = new List<GameObject>();
-    public Dictionary<int , List<StandardFlag>> erscheinungsMap = new Dictionary<int, List<StandardFlag>>();
+    public Dictionary<int, List<StandardFlag>> erscheinungsMap = new Dictionary<int, List<StandardFlag>>();
 
-    public bool calculatedStuff = false;
-
-    // TEST ----------------------
-    public int testPeriod = 704;
-    // TEST ----------------------
+    private bool calculatedStuff = false;
 
     // Update is called once per frame
     void Update()
     {
-        
-        if(!calculatedStuff) return;
-        //TEST -----------------------------------
-        if(Input.GetKeyDown(KeyCode.Return)){
+        if (!calculatedStuff) return;
+
+        // TEST -----------------------------------
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
             StandardFlag.NextPeriod();
         }
-        //TEST -----------------------------------
-        DrawMapOutline();
-        //DrawPointsOnMap();
+        // TEST -----------------------------------
     }
 
-    public int getNextPeriod(int currentPeriod){
-        int newPeriod = currentPeriod;
-        newPeriod ++;
-        while(!erscheinungsMap.TryGetValue(newPeriod, out var v)) {
-            if(newPeriod < 2100){
-                newPeriod ++;
-            } else {
-                newPeriod = currentPeriod;
-                Debug.LogError("Tried to get period at a point past dataset.\n No period higher than " + currentPeriod + " exists");
-            }
-        }
-        return newPeriod;
-    }
-
-    public int getLastPeriod(int currentPeriod, bool alsoActivate = true, bool deactivateNewest = true){
-        int newPeriod = currentPeriod;
-        newPeriod --;
-        
-        if(currentPeriod != 500 && deactivateNewest){
-            foreach(var p in erscheinungsMap[currentPeriod]){
-            p.Deactivate();
-        }
-        }
-        
-
-        while(!erscheinungsMap.TryGetValue(newPeriod, out var v)) {
-            if(newPeriod > 500){
-                newPeriod --;
-            } else {
-                newPeriod = currentPeriod;
-                Debug.LogError("Tried to get period at a point past dataset.\n No period higher than " + currentPeriod + " exists");
-            }
-        }
-        if(newPeriod != 500 && alsoActivate){
-            foreach(var p in erscheinungsMap[newPeriod]){
-                p.Activate();
-            }
-        }
-        
-        return newPeriod;
-    }
-
-    private void DrawMapOutline(){
+    private void DrawMapOutline()
+    {
         lineRenderer.SetPosition(0, topLeftCorner);
         lineRenderer.SetPosition(1, new Vector3(bottomRightCorner.x, bottomRightCorner.y, topLeftCorner.z));
         lineRenderer.SetPosition(2, bottomRightCorner);
         lineRenderer.SetPosition(3, new Vector3(topLeftCorner.x, bottomRightCorner.y, bottomRightCorner.z));
     }
 
-    private void DrawPointsOnMap(){
-        for(int i = 0; i < mapCoordinates.Count; i ++){
-            float newX = topLeftCorner.x + mapCoordinates[i][0] * desiredWidth;
-            float newZ = topLeftCorner.z - mapCoordinates[i][1] * desiredHeight;
-            //Raycast Down to get Y
-            Vector3 oldPos = new Vector3(newX, topLeftCorner.y, newZ);
-            Ray ray = new Ray(oldPos, Vector3.down);
-            Physics.Raycast(ray, out RaycastHit hit, 5f, ~maskToIgnore);
-
-            Vector3 newPosition = hit.point;
-            points[i].transform.position = newPosition;
-        }
-    }
-
-    public void UpdateDesiredCorners(Vector3 newTopLeft, Vector3 newBottomRight){
+    public void UpdateDesiredCorners(Vector3 newTopLeft, Vector3 newBottomRight)
+    {
         topLeftCorner = newTopLeft;
         bottomRightCorner = newBottomRight;
 
@@ -123,113 +62,154 @@ public class CSVInterpreter : MonoBehaviour
         desiredHeight = topLeftCorner.z - bottomRightCorner.z;
     }
 
-    public async Task CalculateStuff(){
-        List<int> ersterwähnungen = new List<int>();
-        List<String> ort = new List<string>();
-        List<String> landkreis = new List<string>();
-        List<String> gPSOld = new List<string>();
-        List<float[]> gPS = new List<float[]>();
+    public void CalculateStuff()
+    {
+        // Parsing CSV data
+        var records = ParseCSVData(inputText.text);
 
-        data = inputText.text.Split(new String[] {";" , "\n"}, System.StringSplitOptions.None);
-        int j = 0;
-        for(int i = 0; i < data.Length; i ++){
-            if(data[i] == "") continue;
-            if(j == 0){
-                ersterwähnungen.Add(int.Parse(data[i]));
-            } else if(j == 1){
-                ort.Add(data[i]);
-            } else if(j == 2){
-                landkreis.Add(data[i]);
-            } else if(j == 3){
-                gPSOld.Add(data[i]);
-                j = 0;
-                continue;
-            }
-            j ++;
-        }
+        // Processing GPS coordinates
+        var gpsCoordinates = ProcessGPSCoordinates(records.gpsOld);
 
-        for(int i = 0; i < gPS.Count; i ++){
-            gPS[i] = new float[2];
-        }
-        List<string> temp = new List<string>();
-        foreach(string s in gPSOld){
-            if(s != "GPS" && s != "-1"){
-                var t = s.Split(new string[] {","}, StringSplitOptions.None);
-                var t1 = new float[2];
-        
+        // Calculate map coordinates
+        CalculateMapCoordinates(gpsCoordinates);
 
-                t[0] = t[0].Replace(".", ",");
-                t[1] = t[1].Replace(".", ",");
-                t1[0] = float.Parse(t[0]);
-                t1[1] = float.Parse(t[1]);
-                
-                //Debug.Log(t[0] + " ; " + t1[0]);
-                //Debug.Log(t[1] + " ; " + t1[1]);
-
-                gPS.Add(t1);
-                points.Add(Instantiate(pointPrefab));
-            } 
-        }
-
-        //calculate highest and lowest points for gps x and y coordinates
-        lowestX = gPS.Min(xy => xy[0]); //top left corner of Map X
-        lowestY = gPS.Min(xy => xy[1]); //top left corner of Map Y
-        highestX = gPS.Max(xy => xy[0]);//bottom right corner of Map X
-        highestY = gPS.Max(xy => xy[1]);//bottom right corner of Map Y
-
-        Debug.Log("lowestX: " + lowestX + ", lowestY: " + lowestY);
-        Debug.Log("highestX: " + highestX + ", highestY: " + highestY);
-
-        for (int i = 0; i < gPS.Count; i ++){
-            float mapX = (gPS[i][0] - lowestX) / (highestX - lowestX);
-            float mapY = (gPS[i][1] - lowestY) / (highestY - lowestY);
-            mapCoordinates.Add(new float[2]{mapX, mapY});
-        }
-
-        for(int i = 0; i < mapCoordinates.Count; i ++){
-            float newX = topLeftCorner.x + mapCoordinates[i][0] * desiredWidth;
-            float newZ = topLeftCorner.z - mapCoordinates[i][1] * desiredHeight;
-            //Raycast Down to get Y
-            Vector3 oldPos = new Vector3(newX, topLeftCorner.y, newZ);
-            Ray ray = new Ray(oldPos, Vector3.down);
-            Physics.Raycast(ray, out RaycastHit hit, 5f, ~maskToIgnore);
-
-            Vector3 newPosition = hit.point + new Vector3(0, 0.1f, 0);
-            StandardFlag newFlag = new StandardFlag(ersterwähnungen[i], hit.point, points[i].transform, Color.red, ort[i]
-                                                    , "Landkreis: " + landkreis[i] + "\n GPS: " + gPSOld[i]);
-            if(!erscheinungsMap.TryGetValue(ersterwähnungen[i], out var v)){
-                erscheinungsMap[ersterwähnungen[i]] = new List<StandardFlag>();
-            }
-            erscheinungsMap[ersterwähnungen[i]].Add(newFlag);
-            points[i].transform.position = newPosition;
-        }
+        // Place markers on the map
+        PlaceMarkers(records, gpsCoordinates);
 
         calculatedStuff = true;
         lineRenderer.enabled = true;
     }
-    
+
+    private (List<int> ersterwähnungen, List<string> ort, List<string> landkreis, List<string> gpsOld) ParseCSVData(string csvText)
+    {
+        var ersterwähnungen = new List<int>();
+        var ort = new List<string>();
+        var landkreis = new List<string>();
+        var gpsOld = new List<string>();
+
+        data = csvText.Split(new string[] { ";", "\n" }, StringSplitOptions.None);
+        for (int i = 0, j = 0; i < data.Length; i++)
+        {
+            if (string.IsNullOrEmpty(data[i])) continue;
+
+            switch (j)
+            {
+                case 0:
+                    if (int.TryParse(data[i], out int year)) 
+                        ersterwähnungen.Add(year);
+                    break;
+                case 1:
+                    ort.Add(data[i]);
+                    break;
+                case 2:
+                    landkreis.Add(data[i]);
+                    break;
+                case 3:
+                    gpsOld.Add(data[i]);
+                    j = -1; // Reset to start of next record
+                    break;
+            }
+            j++;
+        }
+
+        return (ersterwähnungen, ort, landkreis, gpsOld);
+    }
+
+    private List<float[]> ProcessGPSCoordinates(List<string> gpsOld)
+    {
+        var gpsCoordinates = new List<float[]>();
+
+        foreach (string s in gpsOld)
+        {
+            if (s != "GPS" && s != "-1")
+            {
+                var t = s.Split(',');
+                if (t.Length == 2 && float.TryParse(t[0], out float lat) && float.TryParse(t[1], out float lon))
+                {
+                    gpsCoordinates.Add(new float[] { lat, lon });
+                    points.Add(Instantiate(pointPrefab));
+                }
+            }
+        }
+
+        return gpsCoordinates;
+    }
+
+    private void CalculateMapCoordinates(List<float[]> gpsCoordinates)
+    {
+        if (gpsCoordinates.Count == 0) return;
+
+        lowestX = gpsCoordinates.Min(xy => xy[0]);
+        lowestY = gpsCoordinates.Min(xy => xy[1]);
+        highestX = gpsCoordinates.Max(xy => xy[0]);
+        highestY = gpsCoordinates.Max(xy => xy[1]);
+
+        Debug.Log($"lowestX: {lowestX}, lowestY: {lowestY}");
+        Debug.Log($"highestX: {highestX}, highestY: {highestY}");
+
+        foreach (var gps in gpsCoordinates)
+        {
+            float mapX = (gps[0] - lowestX) / (highestX - lowestX);
+            float mapY = (gps[1] - lowestY) / (highestY - lowestY);
+            mapCoordinates.Add(new float[] { mapX, mapY });
+        }
+    }
+
+    private void PlaceMarkers((List<int> ersterwähnungen, List<string> ort, List<string> landkreis, List<string> gpsOld) records, List<float[]> gpsCoordinates)
+    {
+        for (int i = 0; i < mapCoordinates.Count; i++)
+        {
+            float newX = topLeftCorner.x + mapCoordinates[i][0] * desiredWidth;
+            float newZ = topLeftCorner.z - mapCoordinates[i][1] * desiredHeight;
+            Vector3 oldPos = new Vector3(newX, topLeftCorner.y, newZ);
+
+            if (Physics.Raycast(new Ray(oldPos, Vector3.down), out RaycastHit hit, 5f, ~maskToIgnore))
+            {
+                Vector3 newPosition = hit.point + new Vector3(0, 0.1f, 0);
+                var newFlag = new StandardFlag(records.ersterwähnungen[i], hit.point, points[i].transform, Color.red, records.ort[i], $"Landkreis: {records.landkreis[i]}\n GPS: {records.gpsOld[i]}");
+
+                if (!erscheinungsMap.TryGetValue(records.ersterwähnungen[i], out var flagList))
+                {
+                    erscheinungsMap[records.ersterwähnungen[i]] = new List<StandardFlag>();
+                }
+                erscheinungsMap[records.ersterwähnungen[i]].Add(newFlag);
+                points[i].transform.position = newPosition;
+            }
+            else
+            {
+                Debug.LogWarning($"Raycast did not hit for position newX: {newX}, newZ: {newZ}");
+            }
+        }
+    }
+
+
     public int currentPeriod = 704;
-    public void DisplayFromPeriod(int period = 704, bool up = true){
-        if(!erscheinungsMap.TryGetValue(period, out var v)) return;
-        for(int i = 0; i < erscheinungsMap[currentPeriod].Count; i ++){
-            StandardFlag currentFlag = erscheinungsMap[currentPeriod][i];
-            if(up){
-                currentFlag.SetColor(Color.yellow);    
-            } else {
+    public void DisplayFromPeriod(int period = 704, bool up = true)
+    {
+        if (!erscheinungsMap.TryGetValue(period, out var newFlags)) return;
+
+        foreach (var currentFlag in erscheinungsMap[currentPeriod])
+        {
+            if (up)
+            {
+                currentFlag.SetColor(Color.yellow);
+            }
+            else
+            {
                 currentFlag.Deactivate();
             }
         }
 
-        StartCoroutine(DisplayMarkersWithDelay(erscheinungsMap[period], 0.1f));
+        StartCoroutine(DisplayMarkersWithDelay(newFlags, 0.1f));
         currentPeriod = period;
     }
 
-    private IEnumerator DisplayMarkersWithDelay(List<StandardFlag> markers, float delay){
-        for(int i = 0; i < markers.Count; i ++){
-            StandardFlag currentFlag = markers[i];
-            currentFlag.Activate();
+    private IEnumerator DisplayMarkersWithDelay(List<StandardFlag> markers, float delay)
+    {
+        foreach (var marker in markers)
+        {
+            marker.Activate();
             yield return new WaitForSeconds(delay);
         }
-        yield return null;
     }
 }

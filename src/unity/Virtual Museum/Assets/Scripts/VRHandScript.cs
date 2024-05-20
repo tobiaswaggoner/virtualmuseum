@@ -112,10 +112,6 @@ public class VRHandScript : MonoBehaviour
                     //Release the Marker;
                     ReleaseMarker();
                     */
-                    if(!selectedMarker.Equals(null)){
-                        //sets the 
-                        selectedMarker.ShowText();
-                    }
                 }
             }
 
@@ -133,23 +129,6 @@ public class VRHandScript : MonoBehaviour
                 /*
                 CreateMarker();
                 */
-
-                Ray ray = new Ray(thisHand.PointerPose.position, thisHand.PointerPose.forward);
-                Physics.Raycast(ray, out RaycastHit hit);
-                Color color = Color.gray;
-                var test = hit.transform;
-                if(!test.Equals(null)){
-                    if(hit.transform.CompareTag("Marker")){
-                        if(!selectedMarker.Equals(null)){
-                            selectedMarker.HideText();
-                        }
-                        
-                        color = Color.green;
-                        selectedMarker = hit.transform.GetComponent<StandardFlag>();
-                        selectedMarker.Activate();
-                        DisplayRayFromPinchPosition(thisHand.PointerPose, color);
-                    }
-                }
             }
             else if (inputListener.sessionState == InputListener.SessionState.ToolPlacement)
             {

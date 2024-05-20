@@ -21,7 +21,7 @@ public class TableCoordinates : MonoBehaviour
         }
         cSVInterpreter = GameObject.FindGameObjectWithTag("InputsAndLogic").GetComponent<CSVInterpreter>();
         cSVInterpreter.UpdateDesiredCorners(verts[0], verts[verts.Length - 1]);
-        await cSVInterpreter.CalculateStuff();
+        cSVInterpreter.CalculateStuff();
         
     }
 }
