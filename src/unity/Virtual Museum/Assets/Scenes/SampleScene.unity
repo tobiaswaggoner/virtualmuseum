@@ -754,6 +754,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2037080, guid: 4b650a383c3760f449b65ff48bccdd5f, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2037080, guid: 4b650a383c3760f449b65ff48bccdd5f, type: 3}
       propertyPath: m_ClearFlags
       value: 2
       objectReference: {fileID: 0}
@@ -776,6 +780,10 @@ PrefabInstance:
     - target: {fileID: 2037080, guid: 4b650a383c3760f449b65ff48bccdd5f, type: 3}
       propertyPath: m_AllowDynamicResolution
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8100000, guid: 4b650a383c3760f449b65ff48bccdd5f, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 4b650a383c3760f449b65ff48bccdd5f, type: 3}
       propertyPath: _trackingOriginType
@@ -5099,7 +5107,7 @@ MonoBehaviour:
   desiredWidth: 6
   desiredHeight: 3
   lineRenderer: {fileID: 951632371}
-  pointPrefab: {fileID: 2695565502528544082, guid: f122016623411fc409ebb51b3b53fe4d, type: 3}
+  pointPrefab: {fileID: 6262266410090804735, guid: 0b946e4953b1ab54db5bfb1c091db453, type: 3}
   inputText: {fileID: 4900000, guid: 33a54012c07400448a5f0393ddcd71c5, type: 3}
   points: []
   currentPeriod: 704
@@ -5128,7 +5136,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &963194227
 Camera:
   m_ObjectHideFlags: 0
@@ -5136,7 +5144,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}

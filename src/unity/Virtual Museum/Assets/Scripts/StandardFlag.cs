@@ -77,7 +77,7 @@ public class StandardFlag : IFlag
         return false;
     }
 
-    static public void DisplayMarkersOfPeriod(int period){
+    static public void DisplayMarkersOfPeriod(int period) {
         flags
         .Where(flag => flag.startTime == period)
         .ToList()
@@ -93,11 +93,11 @@ public class StandardFlag : IFlag
         float g = 0;
         float b = (startTime - currentTime) / 4;
         Color newColor = new Color(r,g,b);
-        visualComponentTransform.GetChild(0).GetComponent<MeshRenderer>().material.color = newColor;
+        visualComponentTransform.GetComponent<MeshRenderer>().material.color = newColor;
         flagColor = newColor;
         }
 
-    private void EventCallback(bool b){
+    private void EventCallback(bool b) {
         if(b){
             ShowText();
         } else {
@@ -106,11 +106,11 @@ public class StandardFlag : IFlag
     }
 
     public void SetColor(Color color){
-        visualComponentTransform.GetChild(0).GetComponent<MeshRenderer>().material.color = color;
+        visualComponentTransform.GetComponent<MeshRenderer>().material.color = color;
         flagColor = color;
     }
 
-    public void Activate(){
+    public void Activate() {
         //wait for animation and play sound
         visualComponentTransform.gameObject.SetActive(true);
         Animator animator = visualComponentTransform.GetComponent<Animator>();
@@ -120,23 +120,23 @@ public class StandardFlag : IFlag
         SetColor(Color.red);
     }
 
-    public void Deactivate(){
+    public void Deactivate() {
         visualComponentTransform.gameObject.SetActive(false);
     }
 
-    public void ShowText(){
+    public void ShowText() {
         if(!textIsSet) SetText();
         textTransform.gameObject.SetActive(true);
     }
 
-    public void HideText(){
+    public void HideText() {
         var textTransform = transform.GetChild(1); 
         if(!textTransform.Equals(null)){
             textTransform.gameObject.SetActive(false);
         }
     }
 
-    private void SetText(){
+    private void SetText() {
         textTransform.GetChild(0).GetComponent<TMP_Text>().text = header;
         textIsSet = true;
     }
