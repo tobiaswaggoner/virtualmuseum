@@ -8,13 +8,6 @@ using static OVRHand;
 
 public class VRHandScript : MonoBehaviour
 {
-    //TEMPORARY VARIABLES FOR TESTING PURPOSES
-    [SerializeField] private GameObject markerPrefab;
-    private bool holdingMarker = false;
-    private GameObject currentMarker;
-    private FollowTransformScript followTransformScript;
-    //TEMPORARY VARIABLES FOR TESTING PURPOSES
-
     private InputListener inputListener;
     [SerializeField] OVRHand thisHand;
     [SerializeField] private LineRenderer lineRenderer;
@@ -124,64 +117,48 @@ public class VRHandScript : MonoBehaviour
         {
             wasPinching = true;
 
-            if (inputListener.sessionState != InputListener.SessionState.ToolPlacement && !holdingMarker)
-            {
-                /*
-                CreateMarker();
-                */
-            }
-            else if (inputListener.sessionState == InputListener.SessionState.ToolPlacement)
+            if (inputListener.sessionState == InputListener.SessionState.ToolPlacement)
             {
                 MoveTable();
             }
         }   
     }
 
+    bool switchvariable = false;
+    int switchCounter = 0;
     private void MoveTable()
     {
         var pinchTransform = thisHand.PointerPose;
         var ray = new Ray(pinchTransform.position, pinchTransform.forward);
         Physics.Raycast(ray, out RaycastHit hit);
+        RaycastHit? raycastHit = hit;
 
         Color color;
 
-        if (hit.transform.gameObject.name == "TestFloor")
+        if (raycastHit.HasValue)
         {
+            Debug.Log("raycastHit: " + hit.transform.name);
+            if(!switchvariable)
+            {
+                switchvariable = true;
+                switchCounter ++;    
+            }
             color = Color.green;
             inputListener.ActivateGhost();
             inputListener.UpdateGhostPosition(hit.point);
         }
         else
         {
+            if(switchvariable)
+            {
+                switchvariable = false;
+                switchCounter ++;    
+            }
             color = Color.gray;
             inputListener.DeactivateGhost();
         }
-
+        Debug.Log("SW: " + switchCounter);
         DisplayRayFromPinchPosition(thisHand.PointerPose, color);
-    }
-
-    private void CreateMarker()
-    {
-        if (currentMarker is not null || holdingMarker) return;
-
-        currentMarker = Instantiate(markerPrefab);
-        currentMarker.GetComponent<Rigidbody>().isKinematic = true;
-
-        followTransformScript = currentMarker.GetComponent<FollowTransformScript>();
-        followTransformScript.SetTransformToFollow(thisHand.PointerPose);
-        followTransformScript.isFollowing = true;
-
-        holdingMarker = true;
-    }
-
-    private void ReleaseMarker()
-    {
-        if (currentMarker is null || holdingMarker==false) return;
-        followTransformScript = currentMarker.GetComponent<FollowTransformScript>();
-        followTransformScript.isFollowing = false;
-        currentMarker.GetComponent<Rigidbody>().isKinematic = false;
-        currentMarker = null;
-        holdingMarker= false;
     }
 
     /// <summary>
