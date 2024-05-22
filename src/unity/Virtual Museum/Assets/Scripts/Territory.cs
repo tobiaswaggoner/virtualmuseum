@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using OVR.OpenVR;
+using UnityEditor;
 using UnityEngine;
 
 ///A flag for displaying the development of a territory across a time span
@@ -8,137 +10,107 @@ using UnityEngine;
 ///territory. Also includes Color for categorization and visual clarity
 public class Territory : IFlag
 {
+    static public RenderTexture maskTexture;
+    static public Texture2D maskTexture2D;
+    static public List<Territory> Territories = new List<Territory>();
+    static public int textureResolution = 512;
+    static public float currentTime = 704;
+    static public bool maskTextureCreated = false;
+    static public Territory selectedTerritory;
+
     public int startTime { get; set; }
-    public int endTime { get; set; }
+    public Color Color { get; set; }
     public Transform transform { get; set; }
-    public Vector3 position { get; set; }
+    public Vector3 position { get; set; } //center position of the whole territory
+    public List<TerritoryBorder> Borders = new List<TerritoryBorder>();
     public GameObject flagVisualTextComponent { get; set; }
     public GameObject flagVisualIndicator { get; set; }
     public string header { get; set; }
     public string info { get; set; }
 
-    Color territoryColor;
-    Border currentBorder;
-
-    int currentStartingTime;
-    int currentEndingTime;
-    int amountOfEdges;
-    List<Vector3> oldEdges = new List<Vector3>();
-    private Coroutine animationCoroutine;
-
-    public Territory(int startTime, int endTime, Vector3 position, string header, string info){
+    public Territory(int startTime, Vector3 position, string header, string info, Color color){
         this.startTime = startTime;
-        this.endTime = endTime;
         this.position = position;
         this.header = header;
         this.info = info;
+        Color = color;
+        if(maskTextureCreated == false) {
+            maskTexture2D = new Texture2D(2 * textureResolution, textureResolution, TextureFormat.RGBA32, false);
+            maskTexture = new RenderTexture(2 * textureResolution, textureResolution, 0);
+            maskTextureCreated = true;
+        }
+        selectedTerritory = this;
+        Debug.Log("Territory created!");
+        Territories.Add(this);
     }
 
-    /*
-    public void CheckForTimeAdvance(float newTime){
-        if(newTime > endTime || newTime < startTime){
-            Debug.Log("New Time outside Timezone of Object: " + gameObject.name);
-            return;
+    static void UpdateTerritories(float t){
+        currentTime = t;
+        foreach(var territory in Territories){
+            territory.InterpolateTerritories(currentTime);
         }
-
-        if(newTime > currentEndingTime){
-            ///advance time forward to next Border, also recursively call CheckForTimeAdvance
-            currentBorder = currentBorder.nextBorder;
-            DrawNewBorders();
-            currentStartingTime = currentBorder.startingTime;
-            currentEndingTime = currentBorder.endingTime;
-            animationCoroutine = StartCoroutine(AnimateBorders());
-            CheckForTimeAdvance(newTime);
-            return;
-        }
-
-        if(newTime < currentStartingTime){
-            ///advance time backward to last Border, also recursively call CheckForTimeAdvance
-            currentBorder = currentBorder.lastBorder;
-            DrawNewBorders();
-            currentStartingTime = currentBorder.startingTime;
-            currentEndingTime = currentBorder.endingTime;
-            CheckForTimeAdvance(newTime);
-            return;
-        }
-
-        Debug.LogError("Time outside of Territory history");
+        
     }
 
-
-    ///Display the Information of current Flag
-    public void DisplayInformation()
-    {
-        try{
-            flagVisualTextComponent.SetActive(true);
-        } catch {
-            Debug.LogError("Couldn't find a FlagVisualTextComponent attached to Object: "+ gameObject.name);
-        }
-        throw new System.NotImplementedException();
-    }
-
-    public void StopDisplayingInformation(){
-        try{
-            flagVisualTextComponent.SetActive(false);
-        } catch {
-            Debug.LogError("Couldn't find a FlagVisualTextComponent attached to Object: "+ gameObject.name);
-        }
-    }
-
-    public void GetFlagComponents()
-    {
-        try{
-            flagVisualTextComponent = transform.FindChildRecursive("FlagVisualTextComponent").gameObject;
-        } catch {
-            Debug.LogError("Couldn't find a FlagVisualTextComponent in children of Object: "+ gameObject.name);
-        }
-
-        try{
-            flagVisualIndicator = transform.FindChildRecursive("FlagVisualIndicator").gameObject;
-        } catch {
-            Debug.LogError("Couldn't find a FlagVisualIndicator in children of Object: "+ gameObject.name);
-        }
-    }
-
-    public void InitialiseNewBorders(List<Border> borders){
-        Border startBorder = borders[0];
-        Border endBorder = borders[borders.Count - 1];
-        for(int i = 0; i < borders.Count; i ++){
-            if(i < borders.Count - 1){
-                borders[i].nextBorder = borders[i + 1];
+    void InterpolateTerritories(float time){
+        TerritoryBorder previous = null;
+        TerritoryBorder next = null;
+        foreach(var border in Borders){
+            if(border.startTime <= time && (previous == null || border.startTime > previous.startTime)){
+                previous = border;
             }
-            if(i > 0){
-                borders[i].lastBorder = borders[i  -1];
+            if(border.startTime >= time && (next == null || border.startTime < next.startTime)){
+                next = border;
             }
-            borders[i].endBorder = endBorder;
-            borders[i].startBorder = startBorder;
+        }
+        
+
+        if(previous != null && next != null && previous != next){
+            float t = Mathf.InverseLerp(previous.startTime, next.startTime, time);
+            GenerateMaskTexture(previous, next, t);
         }
     }
 
-    public void AddNewBorder(Border newBorder){
-        currentBorder.endBorder.nextBorder = newBorder;
-        newBorder.lastBorder = currentBorder.endBorder;
-
-        Border originalBorder = currentBorder;
-        currentBorder = currentBorder.startBorder;
-        while(!currentBorder.nextBorder.Equals(null)){
-            currentBorder.endBorder = newBorder;
+    static void GenerateMaskTexture(TerritoryBorder previous, TerritoryBorder next, float t){
+        Color clearColor = new Color(0,0,0,0);
+        for(int y = 0; y < textureResolution; y ++){
+            for(int x = 0; x < 2*textureResolution; x ++){
+                maskTexture2D.SetPixel(x, y, clearColor);
+            }
         }
 
-        currentBorder = originalBorder;
+        DrawTerritory(previous, next, t);
+        maskTexture2D.Apply();
+        Graphics.Blit(maskTexture2D, maskTexture);
     }
 
-    private void DrawNewBorders(){
-        ///Get new edges from current Border and adjust texture
-        throw new System.NotImplementedException();
+    static void DrawTerritory(TerritoryBorder previous, TerritoryBorder next, float t){
+        Color interpolatedColor = Color.Lerp(previous.Color, next.Color, t);
+
+        for(int i = 0; i < previous.Points.Count; i ++){
+            Vector3 previousPoint = previous.Points[i];
+            Vector3 nextPoint = next.Points[i];
+            Vector3 interpolatedPoint = Vector3.Lerp(previousPoint, nextPoint, t);
+
+            int x = Mathf.RoundToInt(interpolatedPoint.x * textureResolution * 2);
+            int y = Mathf.RoundToInt(interpolatedPoint.z * textureResolution);
+
+            if(x >= 0 && x < textureResolution * 2 && y >= 0 && y < textureResolution){
+                maskTexture2D.SetPixel(x, y, interpolatedColor);
+            }
+        }
     }
 
-    public IEnumerator AnimateBorders(){
-        List<Vector3> newEdges = currentBorder.edges;
-        ///interpolate between each point in oldEdges and newEdges to create a Territory animation
-        throw new System.NotImplementedException();
+    public void AddPointToCurrentBorder(Vector3 point, int t, Color c){
+        TerritoryBorder currentBorder = Borders.Find(b => b.startTime == currentTime);
+        if(currentBorder == null){
+            currentBorder = new TerritoryBorder(t, c);
+            Borders.Add(currentBorder);
+            Debug.Log("Created Border! " + t);
+        }
+        currentBorder.Points.Add(point);
+        Debug.Log("Point created! " + currentBorder.startTime);
     }
 
-    public void SetBorder(Border border){currentBorder = border;}
-    */
+
 }
