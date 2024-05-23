@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using OVR.OpenVR;
+using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 ///A flag for displaying the development of a territory across a time span
@@ -13,7 +15,7 @@ public class Territory : IFlag
     static public RenderTexture maskTexture;
     static public Texture2D maskTexture2D;
     static public List<Territory> Territories = new List<Territory>();
-    static public int textureResolution = 512;
+    static public int textureResolution = 255;
     static public float currentTime = 704;
     static public bool maskTextureCreated = false;
     static public Territory selectedTerritory;
@@ -27,6 +29,9 @@ public class Territory : IFlag
     public GameObject flagVisualIndicator { get; set; }
     public string header { get; set; }
     public string info { get; set; }
+    public TerritoryBorder currentBorder = null;
+    public TerritoryBorder previousBorder = null;
+    public TerritoryBorder interMediateBorder = null;
 
     public Territory(int startTime, Vector3 position, string header, string info, Color color){
         this.startTime = startTime;
@@ -34,69 +39,150 @@ public class Territory : IFlag
         this.header = header;
         this.info = info;
         Color = color;
-        if(maskTextureCreated == false) {
-            maskTexture2D = new Texture2D(2 * textureResolution, textureResolution, TextureFormat.RGBA32, false);
-            maskTexture = new RenderTexture(2 * textureResolution, textureResolution, 0);
-            maskTextureCreated = true;
-        }
         selectedTerritory = this;
         Debug.Log("Territory created!");
         Territories.Add(this);
     }
 
-    static void UpdateTerritories(float t){
-        currentTime = t;
-        foreach(var territory in Territories){
-            territory.InterpolateTerritories(currentTime);
-        }
-        
+    static public void ResetStatics(){
+        maskTexture = null;
+        maskTexture2D = null;
+        Territories = new List<Territory>();
+        textureResolution = 255;
+        currentTime = 704;
+        maskTextureCreated = false;
+        selectedTerritory = null;
+
     }
 
-    void InterpolateTerritories(float time){
-        TerritoryBorder previous = null;
-        TerritoryBorder next = null;
-        foreach(var border in Borders){
-            if(border.startTime <= time && (previous == null || border.startTime > previous.startTime)){
-                previous = border;
-            }
-            if(border.startTime >= time && (next == null || border.startTime < next.startTime)){
-                next = border;
-            }
+    public void DrawCurrentTerritory(){
+        currentBorder = Borders.Find(b => b.startTime == currentTime);
+        if(currentBorder == null || currentBorder.Points.Count == 0) {
+            ClearMaskTexture();
+            return;
         }
-        
+        Debug.Log("Drawing");
+        GenerateMaskTexture(currentBorder);
+    }
 
-        if(previous != null && next != null && previous != next){
-            float t = Mathf.InverseLerp(previous.startTime, next.startTime, time);
-            GenerateMaskTexture(previous, next, t);
+    public bool InterpolateBorders(float t){
+        currentBorder = Borders.Find(b => b.startTime == currentTime);
+        if(interMediateBorder == null 
+        || currentBorder == null
+        || previousBorder == null
+        || interMediateBorder.Points.Count == 0 
+        || interMediateBorder.Points.Count > currentBorder.Points.Count) {
+            ClearMaskTexture();
+            return false;
+        }
+
+        for(int i = 0; i < interMediateBorder.Points.Count; i ++){
+            interMediateBorder.Points[i] = Vector3.Lerp(previousBorder.Points[i], currentBorder.Points[i], t / 2);
+        }
+
+        GenerateMaskTexture(interMediateBorder);
+        return true;
+    }
+
+    public void InitializeIntermediatePoints(){
+        TerritoryBorder currentBorder = Borders.Find(b => b.startTime == currentTime);
+        if(currentBorder == null || previousBorder == null) return;
+        if(interMediateBorder == null) interMediateBorder = new TerritoryBorder(-1, previousBorder.Color);
+        interMediateBorder.Points.Clear();
+        foreach(var point in previousBorder.Points){
+            interMediateBorder.Points.Add(point);
         }
     }
 
-    static void GenerateMaskTexture(TerritoryBorder previous, TerritoryBorder next, float t){
+    static void ClearMaskTexture(){
         Color clearColor = new Color(0,0,0,0);
         for(int y = 0; y < textureResolution; y ++){
             for(int x = 0; x < 2*textureResolution; x ++){
                 maskTexture2D.SetPixel(x, y, clearColor);
             }
         }
+        maskTexture2D.Apply();
+    }
 
-        DrawTerritory(previous, next, t);
+
+    static void GenerateMaskTexture(TerritoryBorder thisBorder){
+        ClearMaskTexture();
+        DrawTerritory(thisBorder);
         maskTexture2D.Apply();
         Graphics.Blit(maskTexture2D, maskTexture);
     }
 
-    static void DrawTerritory(TerritoryBorder previous, TerritoryBorder next, float t){
-        Color interpolatedColor = Color.Lerp(previous.Color, next.Color, t);
+    private static Vector3 NormalizeToTextureSpace(Vector3 point)
+    {
+        // Assuming the plane is centered at the origin
+        float normalizedX = Mathf.InverseLerp(-2f, 2f, -point.x);
+        float normalizedZ = Mathf.InverseLerp(-1f, 1f, -point.z); // Assuming y is up and down, z is forward and back
 
-        for(int i = 0; i < previous.Points.Count; i ++){
-            Vector3 previousPoint = previous.Points[i];
-            Vector3 nextPoint = next.Points[i];
-            Vector3 interpolatedPoint = Vector3.Lerp(previousPoint, nextPoint, t);
+        return new Vector3(normalizedX, point.y, normalizedZ); // y is height, which we don't use for texture
+    }
 
-            int x = Mathf.RoundToInt(interpolatedPoint.x * textureResolution * 2);
-            int y = Mathf.RoundToInt(interpolatedPoint.z * textureResolution);
+    static void DrawTerritory(TerritoryBorder thisBorder){
+        
+        List<Vector3> normalizedPoints = new List<Vector3>();
 
-            if(x >= 0 && x < textureResolution * 2 && y >= 0 && y < textureResolution){
-                maskTexture2D.SetPixel(x, y, interpolatedColor);
+        for(int i = 0; i < thisBorder.Points.Count; i ++){
+
+            Vector3 normalizedPoint = NormalizeToTextureSpace(thisBorder.Points[i]);
+            normalizedPoints.Add(normalizedPoint);
+        }
+
+        FillPolygon(normalizedPoints, thisBorder.Color);
+    }
+
+    private static void FillPolygon(List<Vector3> points, Color color)
+    {
+        if (points.Count < 3)
+            return; // Not a valid polygon
+
+        // Convert points to integer coordinates
+        List<Vector2Int> intPoints = new List<Vector2Int>();
+        foreach (var point in points)
+        {
+            int x = Mathf.RoundToInt(point.x * (textureResolution * 2 - 1));
+            int y = Mathf.RoundToInt(point.z * (textureResolution - 1));
+            intPoints.Add(new Vector2Int(x, y));
+        }
+
+        // Find bounds of the polygon
+        int minY = intPoints[0].y, maxY = intPoints[0].y;
+        foreach (var point in intPoints)
+        {
+            if (point.y < minY) minY = point.y;
+            if (point.y > maxY) maxY = point.y;
+        }
+
+        // Scanline fill algorithm
+        for (int y = minY; y <= maxY; y++)
+        {
+            List<int> nodes = new List<int>();
+            int j = intPoints.Count - 1;
+            for (int i = 0; i < intPoints.Count; i++)
+            {
+                if (intPoints[i].y < y && intPoints[j].y >= y || intPoints[j].y < y && intPoints[i].y >= y)
+                {
+                    nodes.Add(intPoints[i].x + (y - intPoints[i].y) * (intPoints[j].x - intPoints[i].x) / (intPoints[j].y - intPoints[i].y));
+                }
+                j = i;
+            }
+
+            nodes.Sort();
+            for (int i = 0; i < nodes.Count; i += 2)
+            {
+                if (nodes[i] >= textureResolution * 2) break;
+                if (nodes[i + 1] > 0)
+                {
+                    if (nodes[i] < 0) nodes[i] = 0;
+                    if (nodes[i + 1] > textureResolution * 2) nodes[i + 1] = textureResolution * 2;
+                    for (int x = nodes[i]; x < nodes[i + 1]; x++)
+                    {
+                        maskTexture2D.SetPixel(x, y, color);
+                    }
+                }
             }
         }
     }
@@ -106,6 +192,7 @@ public class Territory : IFlag
         if(currentBorder == null){
             currentBorder = new TerritoryBorder(t, c);
             Borders.Add(currentBorder);
+            this.currentBorder = currentBorder;
             Debug.Log("Created Border! " + t);
         }
         currentBorder.Points.Add(point);

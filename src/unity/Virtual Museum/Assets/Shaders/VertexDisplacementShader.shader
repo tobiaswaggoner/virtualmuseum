@@ -6,7 +6,6 @@ Shader "Custom/HeightMapDeformSurface"
         _HeightMap ("Height Map", 2D) = "black" {}
         _HeightScale ("Height Scale", Float) = 1.0
         _MaskTex ("Mask texture", 2D) = "white" {}
-        _Color ("Overlay Color", Color) = (1,1,1,1)
         _BlendFactor ("Blend Factor", Range(0,1)) = 0.5
     }
     SubShader
@@ -21,7 +20,6 @@ Shader "Custom/HeightMapDeformSurface"
         sampler2D _HeightMap;
         sampler2D _MaskTex;
         float _HeightScale;
-        fixed4 _Color;
         float _BlendFactor;
 
         struct Input
@@ -45,9 +43,9 @@ Shader "Custom/HeightMapDeformSurface"
             fixed4 baseColor = tex2D(_MainTex, IN.uv_MainTex);
             
             fixed4 maskColor = tex2D(_MaskTex, IN.uv_MaskTex);
+
+            fixed4 finalColor = lerp(baseColor, maskColor, _BlendFactor * maskColor.a);
             
-            fixed4 overlayColor = maskColor * _Color;
-            fixed4 finalColor = lerp(baseColor, maskColor * _Color, _BlendFactor * maskColor.a);
             o.Albedo = finalColor.rgb;
             o.Alpha = finalColor.a;
         }
