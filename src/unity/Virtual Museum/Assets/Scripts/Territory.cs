@@ -1,5 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using OVR.OpenVR;
+using Unity.VisualScripting;
+using UnityEditor;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 ///A flag for displaying the development of a territory across a time span
@@ -8,137 +12,192 @@ using UnityEngine;
 ///territory. Also includes Color for categorization and visual clarity
 public class Territory : IFlag
 {
+    static public RenderTexture maskTexture;
+    static public Texture2D maskTexture2D;
+    static public List<Territory> Territories = new List<Territory>();
+    static public int textureResolution = 255;
+    static public float currentTime = 704;
+    static public bool maskTextureCreated = false;
+    static public Territory selectedTerritory;
+
     public int startTime { get; set; }
-    public int endTime { get; set; }
+    public Color Color { get; set; }
     public Transform transform { get; set; }
-    public Vector3 position { get; set; }
+    public Vector3 position { get; set; } //center position of the whole territory
+    public List<TerritoryBorder> Borders = new List<TerritoryBorder>();
     public GameObject flagVisualTextComponent { get; set; }
     public GameObject flagVisualIndicator { get; set; }
     public string header { get; set; }
     public string info { get; set; }
+    public TerritoryBorder currentBorder = null;
+    public TerritoryBorder previousBorder = null;
+    public TerritoryBorder interMediateBorder = null;
 
-    Color territoryColor;
-    Border currentBorder;
-
-    int currentStartingTime;
-    int currentEndingTime;
-    int amountOfEdges;
-    List<Vector3> oldEdges = new List<Vector3>();
-    private Coroutine animationCoroutine;
-
-    public Territory(int startTime, int endTime, Vector3 position, string header, string info){
+    public Territory(int startTime, Vector3 position, string header, string info, Color color){
         this.startTime = startTime;
-        this.endTime = endTime;
         this.position = position;
         this.header = header;
         this.info = info;
+        Color = color;
+        selectedTerritory = this;
+        Debug.Log("Territory created!");
+        Territories.Add(this);
     }
 
-    /*
-    public void CheckForTimeAdvance(float newTime){
-        if(newTime > endTime || newTime < startTime){
-            Debug.Log("New Time outside Timezone of Object: " + gameObject.name);
+    static public void ResetStatics(){
+        maskTexture = null;
+        maskTexture2D = null;
+        Territories = new List<Territory>();
+        textureResolution = 255;
+        currentTime = 704;
+        maskTextureCreated = false;
+        selectedTerritory = null;
+
+    }
+
+    public void DrawCurrentTerritory(){
+        currentBorder = Borders.Find(b => b.startTime == currentTime);
+        if(currentBorder == null || currentBorder.Points.Count == 0) {
+            ClearMaskTexture();
             return;
         }
-
-        if(newTime > currentEndingTime){
-            ///advance time forward to next Border, also recursively call CheckForTimeAdvance
-            currentBorder = currentBorder.nextBorder;
-            DrawNewBorders();
-            currentStartingTime = currentBorder.startingTime;
-            currentEndingTime = currentBorder.endingTime;
-            animationCoroutine = StartCoroutine(AnimateBorders());
-            CheckForTimeAdvance(newTime);
-            return;
-        }
-
-        if(newTime < currentStartingTime){
-            ///advance time backward to last Border, also recursively call CheckForTimeAdvance
-            currentBorder = currentBorder.lastBorder;
-            DrawNewBorders();
-            currentStartingTime = currentBorder.startingTime;
-            currentEndingTime = currentBorder.endingTime;
-            CheckForTimeAdvance(newTime);
-            return;
-        }
-
-        Debug.LogError("Time outside of Territory history");
+        Debug.Log("Drawing");
+        GenerateMaskTexture(currentBorder);
     }
 
-
-    ///Display the Information of current Flag
-    public void DisplayInformation()
-    {
-        try{
-            flagVisualTextComponent.SetActive(true);
-        } catch {
-            Debug.LogError("Couldn't find a FlagVisualTextComponent attached to Object: "+ gameObject.name);
+    public bool InterpolateBorders(float t){
+        currentBorder = Borders.Find(b => b.startTime == currentTime);
+        if(interMediateBorder == null 
+        || currentBorder == null
+        || previousBorder == null
+        || interMediateBorder.Points.Count == 0 
+        || interMediateBorder.Points.Count > currentBorder.Points.Count) {
+            ClearMaskTexture();
+            return false;
         }
-        throw new System.NotImplementedException();
+
+        for(int i = 0; i < interMediateBorder.Points.Count; i ++){
+            interMediateBorder.Points[i] = Vector3.Lerp(previousBorder.Points[i], currentBorder.Points[i], t / 2);
+        }
+
+        GenerateMaskTexture(interMediateBorder);
+        return true;
     }
 
-    public void StopDisplayingInformation(){
-        try{
-            flagVisualTextComponent.SetActive(false);
-        } catch {
-            Debug.LogError("Couldn't find a FlagVisualTextComponent attached to Object: "+ gameObject.name);
+    public void InitializeIntermediatePoints(){
+        TerritoryBorder currentBorder = Borders.Find(b => b.startTime == currentTime);
+        if(currentBorder == null || previousBorder == null) return;
+        if(interMediateBorder == null) interMediateBorder = new TerritoryBorder(-1, previousBorder.Color);
+        interMediateBorder.Points.Clear();
+        foreach(var point in previousBorder.Points){
+            interMediateBorder.Points.Add(point);
         }
     }
 
-    public void GetFlagComponents()
-    {
-        try{
-            flagVisualTextComponent = transform.FindChildRecursive("FlagVisualTextComponent").gameObject;
-        } catch {
-            Debug.LogError("Couldn't find a FlagVisualTextComponent in children of Object: "+ gameObject.name);
-        }
-
-        try{
-            flagVisualIndicator = transform.FindChildRecursive("FlagVisualIndicator").gameObject;
-        } catch {
-            Debug.LogError("Couldn't find a FlagVisualIndicator in children of Object: "+ gameObject.name);
-        }
-    }
-
-    public void InitialiseNewBorders(List<Border> borders){
-        Border startBorder = borders[0];
-        Border endBorder = borders[borders.Count - 1];
-        for(int i = 0; i < borders.Count; i ++){
-            if(i < borders.Count - 1){
-                borders[i].nextBorder = borders[i + 1];
+    static void ClearMaskTexture(){
+        Color clearColor = new Color(0,0,0,0);
+        for(int y = 0; y < textureResolution; y ++){
+            for(int x = 0; x < 2*textureResolution; x ++){
+                maskTexture2D.SetPixel(x, y, clearColor);
             }
-            if(i > 0){
-                borders[i].lastBorder = borders[i  -1];
+        }
+        maskTexture2D.Apply();
+    }
+
+
+    static void GenerateMaskTexture(TerritoryBorder thisBorder){
+        ClearMaskTexture();
+        DrawTerritory(thisBorder);
+        maskTexture2D.Apply();
+        Graphics.Blit(maskTexture2D, maskTexture);
+    }
+
+    private static Vector3 NormalizeToTextureSpace(Vector3 point)
+    {
+        // Assuming the plane is centered at the origin
+        float normalizedX = Mathf.InverseLerp(-2f, 2f, -point.x);
+        float normalizedZ = Mathf.InverseLerp(-1f, 1f, -point.z); // Assuming y is up and down, z is forward and back
+
+        return new Vector3(normalizedX, point.y, normalizedZ); // y is height, which we don't use for texture
+    }
+
+    static void DrawTerritory(TerritoryBorder thisBorder){
+        
+        List<Vector3> normalizedPoints = new List<Vector3>();
+
+        for(int i = 0; i < thisBorder.Points.Count; i ++){
+
+            Vector3 normalizedPoint = NormalizeToTextureSpace(thisBorder.Points[i]);
+            normalizedPoints.Add(normalizedPoint);
+        }
+
+        FillPolygon(normalizedPoints, thisBorder.Color);
+    }
+
+    private static void FillPolygon(List<Vector3> points, Color color)
+    {
+        if (points.Count < 3)
+            return; // Not a valid polygon
+
+        // Convert points to integer coordinates
+        List<Vector2Int> intPoints = new List<Vector2Int>();
+        foreach (var point in points)
+        {
+            int x = Mathf.RoundToInt(point.x * (textureResolution * 2 - 1));
+            int y = Mathf.RoundToInt(point.z * (textureResolution - 1));
+            intPoints.Add(new Vector2Int(x, y));
+        }
+
+        // Find bounds of the polygon
+        int minY = intPoints[0].y, maxY = intPoints[0].y;
+        foreach (var point in intPoints)
+        {
+            if (point.y < minY) minY = point.y;
+            if (point.y > maxY) maxY = point.y;
+        }
+
+        // Scanline fill algorithm
+        for (int y = minY; y <= maxY; y++)
+        {
+            List<int> nodes = new List<int>();
+            int j = intPoints.Count - 1;
+            for (int i = 0; i < intPoints.Count; i++)
+            {
+                if (intPoints[i].y < y && intPoints[j].y >= y || intPoints[j].y < y && intPoints[i].y >= y)
+                {
+                    nodes.Add(intPoints[i].x + (y - intPoints[i].y) * (intPoints[j].x - intPoints[i].x) / (intPoints[j].y - intPoints[i].y));
+                }
+                j = i;
             }
-            borders[i].endBorder = endBorder;
-            borders[i].startBorder = startBorder;
+
+            nodes.Sort();
+            for (int i = 0; i < nodes.Count; i += 2)
+            {
+                if (nodes[i] >= textureResolution * 2) break;
+                if (nodes[i + 1] > 0)
+                {
+                    if (nodes[i] < 0) nodes[i] = 0;
+                    if (nodes[i + 1] > textureResolution * 2) nodes[i + 1] = textureResolution * 2;
+                    for (int x = nodes[i]; x < nodes[i + 1]; x++)
+                    {
+                        maskTexture2D.SetPixel(x, y, color);
+                    }
+                }
+            }
         }
     }
 
-    public void AddNewBorder(Border newBorder){
-        currentBorder.endBorder.nextBorder = newBorder;
-        newBorder.lastBorder = currentBorder.endBorder;
-
-        Border originalBorder = currentBorder;
-        currentBorder = currentBorder.startBorder;
-        while(!currentBorder.nextBorder.Equals(null)){
-            currentBorder.endBorder = newBorder;
+    public void AddPointToCurrentBorder(Vector3 point, int t, Color c){
+        TerritoryBorder currentBorder = Borders.Find(b => b.startTime == currentTime);
+        if(currentBorder == null){
+            currentBorder = new TerritoryBorder(t, c);
+            Borders.Add(currentBorder);
+            this.currentBorder = currentBorder;
+            Debug.Log("Created Border! " + t);
         }
-
-        currentBorder = originalBorder;
+        currentBorder.Points.Add(point);
+        Debug.Log("Point created! " + currentBorder.startTime);
     }
 
-    private void DrawNewBorders(){
-        ///Get new edges from current Border and adjust texture
-        throw new System.NotImplementedException();
-    }
 
-    public IEnumerator AnimateBorders(){
-        List<Vector3> newEdges = currentBorder.edges;
-        ///interpolate between each point in oldEdges and newEdges to create a Territory animation
-        throw new System.NotImplementedException();
-    }
-
-    public void SetBorder(Border border){currentBorder = border;}
-    */
 }
