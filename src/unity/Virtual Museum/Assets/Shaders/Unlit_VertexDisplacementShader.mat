@@ -39,7 +39,7 @@ Material:
     m_Floats:
     - _BlendFactor: 0.191
     - _EdgeFactor: 0
-    - _HeightScale: 0.006
+    - _HeightScale: 0.001
     m_Colors:
     - _AmbientColor: {r: 0.6886792, g: 0.62047166, b: 0.49052152, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}

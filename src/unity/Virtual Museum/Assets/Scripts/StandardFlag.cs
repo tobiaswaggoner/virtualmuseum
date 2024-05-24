@@ -37,6 +37,7 @@ public class StandardFlag : IFlag
         this.flagColor = flagColor;
         
         visualComponentTransform = transform.GetChild(0);
+        Debug.Log(visualComponentTransform.name);
         textTransform = transform.GetChild(1);
         pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
         pokedListener = new UnityAction<bool>(EventCallback);
@@ -112,6 +113,7 @@ public class StandardFlag : IFlag
 
     public void Activate(){
         //wait for animation and play sound
+        if(visualComponentTransform == null) visualComponentTransform = transform.GetChild(0);
         visualComponentTransform.gameObject.SetActive(true);
         Animator animator = visualComponentTransform.GetComponent<Animator>();
         AudioSource audioSource = visualComponentTransform.GetComponent<AudioSource>();
