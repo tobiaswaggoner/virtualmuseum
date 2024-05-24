@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Linq;
+using UnityEditor;
 using UnityEngine.Timeline;
 
 ///A standard flag for displaying information about a point of interest
@@ -27,7 +28,7 @@ public class StandardFlag : IFlag
     private UnityAction<bool> pokedListener;
 
     private bool textIsSet = false;
-
+    
     public StandardFlag(int startTime, Vector3 position, Transform transform, Color flagColor, string header = "test", string info = "no new info"){
         this.startTime = startTime;
         this.transform = transform;
@@ -37,7 +38,7 @@ public class StandardFlag : IFlag
         this.flagColor = flagColor;
         
         visualComponentTransform = transform.GetChild(0);
-        Debug.Log(visualComponentTransform.name);
+        // Debug.Log(visualComponentTransform.name);
         textTransform = transform.GetChild(1);
         pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
         pokedListener = new UnityAction<bool>(EventCallback);
@@ -113,7 +114,7 @@ public class StandardFlag : IFlag
 
     public void Activate() {
         //wait for animation and play sound
-        if(visualComponentTransform == null) visualComponentTransform = transform.GetChild(0);
+        // if(visualComponentTransform == null) visualComponentTransform = transform.GetChild(0);
         visualComponentTransform.gameObject.SetActive(true);
         Animator animator = visualComponentTransform.GetComponent<Animator>();
         AudioSource audioSource = visualComponentTransform.GetComponent<AudioSource>();
@@ -143,4 +144,13 @@ public class StandardFlag : IFlag
         textIsSet = true;
     }
 
+    public static void OnDisable()
+    {
+        foreach (var f in flags)
+        {
+            f.pokeEventInterpreter.UnregisterForPokedEvent(f.pokedListener);
+        }
+        flags.Clear();
+        currentTime = 700;
+    }
 }

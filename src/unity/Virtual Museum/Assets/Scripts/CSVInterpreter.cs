@@ -212,4 +212,9 @@ public class CSVInterpreter : MonoBehaviour
             yield return new WaitForSeconds(delay);
         }
     }
+
+    private void OnApplicationQuit()
+    {
+        StandardFlag.OnDisable();
+    }
 }
