@@ -7,65 +7,17 @@ public class TerritoryController : MonoBehaviour
 {
     public Material territoryMaterial;
     float time;
-
-    public bool testing = true;
-
-    public List<GameObject> testingVertices1 = new List<GameObject>();
-    public List<GameObject> testingVertices2 = new List<GameObject>();
-
-    private Coroutine testingRoutine;
-    public TMP_Text timeDisplay;
     
     void Start()
     {
-        if(!testing) return;
         Territory.ResetStatics();
         Territory.maskTexture2D = new Texture2D(2 * Territory.textureResolution, Territory.textureResolution, TextureFormat.RGBA32, false);
         Territory.maskTexture = new RenderTexture(2 * Territory.textureResolution, Territory.textureResolution, 0);
         Territory.maskTextureCreated = true;
         territoryMaterial.SetTexture("_MaskTex", Territory.maskTexture);
-
-        
-        //create testing Points:
-        new Territory((int)Territory.currentTime, new Vector3(0,0,0), "testTerritory" + Territory.currentTime, "none", Color.blue);
-
-        foreach(var vertex in testingVertices1){
-            Territory.selectedTerritory.AddPointToCurrentBorder(vertex.transform.position, 704, Color.blue);
-        }
-        AdvanceTerritories();
-        Debug.Log("TerritoryTime: " + Territory.currentTime);
-        foreach(var vertex in testingVertices2){
-            Territory.selectedTerritory.AddPointToCurrentBorder(vertex.transform.position, 705, Color.blue);
-        }
-        RegressTerritories();
-        testingRoutine = StartCoroutine(TestingRoutine());
-    }
-
-    private IEnumerator TestingRoutine(){
-        while(true){
-            yield return new WaitForSeconds(3f);
-            AdvanceTerritories();
-            timeDisplay.text = Territory.currentTime.ToString();
-            foreach(var g in testingVertices2){
-                g.SetActive(true);
-            }
-            foreach(var g in testingVertices1){
-                g.SetActive(false);
-            }
-            yield return new WaitForSeconds(3f);
-            RegressTerritories();
-            timeDisplay.text = Territory.currentTime.ToString();
-            foreach(var g in testingVertices1){
-                g.SetActive(true);
-            }
-            foreach(var g in testingVertices2){
-                g.SetActive(false);
-            }
-        }
-    }   
+    } 
 
     void Update(){
-        if(!testing) return;
         if(Territory.Territories.Count == 0) {return;}
         foreach(var territory in Territory.Territories){
             if(!territory.InterpolateBorders(time)){
