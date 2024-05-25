@@ -119,7 +119,6 @@ public class CSVInterpreter : MonoBehaviour
                 var t = s.Split(',');
                 if (t.Length == 2 && float.TryParse(t[0], out float lat) && float.TryParse(t[1], out float lon))
                 {
-                    Debug.Log(lat + " : " +lon);
                     gpsCoordinates.Add(new float[] { lat, lon });
                     points.Add(Instantiate(pointPrefab));
                 }
