@@ -1,34 +1,30 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 using TMPro;
 
-public class TerritoryController : MonoBehaviour
+public class PreviewTerritorySetup : MonoBehaviour
 {
     public Material territoryMaterial;
-    float time;
-
-    public bool testing = true;
-
+    private float time;
     public List<GameObject> testingVertices1 = new List<GameObject>();
     public List<GameObject> testingVertices2 = new List<GameObject>();
-
     private Coroutine testingRoutine;
-    public TMP_Text timeDisplay;
-    
+    public TMP_Text timeDisplayTerritory;
+    public TMP_Text timeDisplayMarker;
+
+
+    // Start is called before the first frame update
     void Start()
     {
-        if(!testing) return;
         Territory.ResetStatics();
         Territory.maskTexture2D = new Texture2D(2 * Territory.textureResolution, Territory.textureResolution, TextureFormat.RGBA32, false);
         Territory.maskTexture = new RenderTexture(2 * Territory.textureResolution, Territory.textureResolution, 0);
         Territory.maskTextureCreated = true;
         territoryMaterial.SetTexture("_MaskTex", Territory.maskTexture);
-
-        
         //create testing Points:
         new Territory((int)Territory.currentTime, new Vector3(0,0,0), "testTerritory" + Territory.currentTime, "none", Color.blue);
-
+    
         foreach(var vertex in testingVertices1){
             Territory.selectedTerritory.AddPointToCurrentBorder(vertex.transform.position, 704, Color.blue);
         }
@@ -45,7 +41,7 @@ public class TerritoryController : MonoBehaviour
         while(true){
             yield return new WaitForSeconds(3f);
             AdvanceTerritories();
-            timeDisplay.text = Territory.currentTime.ToString();
+            timeDisplayTerritory.text = Territory.currentTime.ToString();
             foreach(var g in testingVertices2){
                 g.SetActive(true);
             }
@@ -54,7 +50,7 @@ public class TerritoryController : MonoBehaviour
             }
             yield return new WaitForSeconds(3f);
             RegressTerritories();
-            timeDisplay.text = Territory.currentTime.ToString();
+            timeDisplayTerritory.text = Territory.currentTime.ToString();
             foreach(var g in testingVertices1){
                 g.SetActive(true);
             }
@@ -62,36 +58,21 @@ public class TerritoryController : MonoBehaviour
                 g.SetActive(false);
             }
         }
-    }   
+    }  
 
-    void Update(){
-        if(!testing) return;
-        if(Territory.Territories.Count == 0) {return;}
+    // Update is called once per frame
+    void Update()
+    {   
+        timeDisplayMarker.text = StandardFlag.currentTime.ToString();
+        if(Territory.Territories.Count == 0) {
+            return;
+            }
         foreach(var territory in Territory.Territories){
             if(!territory.InterpolateBorders(time)){
                 territory.DrawCurrentTerritory();
             }
         }
         time += Time.deltaTime;
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                Vector3 point = hit.point;
-                if(Territory.selectedTerritory == null){
-                    new Territory((int)Territory.currentTime, point, "testTerritory" + Territory.currentTime, "none", Color.red);
-                    return;
-                }
-                Territory.selectedTerritory.AddPointToCurrentBorder(point, (int) Territory.currentTime, Color.blue);
-            }
-        } else if (Input.GetMouseButtonDown(1)){
-            AdvanceTerritories();
-            Debug.Log("TerritoryTime: " + Territory.currentTime);
-        } else if(Input.GetKeyDown(KeyCode.Space)){
-            RegressTerritories();
-            Debug.Log("TerritoryTime: " + Territory.currentTime);
-        }
     }
 
     public void AdvanceTerritories(){
@@ -117,5 +98,4 @@ public class TerritoryController : MonoBehaviour
             territory.InitializeIntermediatePoints();
         }
     }
-
 }

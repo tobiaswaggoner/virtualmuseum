@@ -8,7 +8,6 @@ public class InputListener : MonoBehaviour
 {
     /*Script for managing game state and interpreting input accordingly*/
     [SerializeField] private List<GameObject> UserInterfaces;
-
     [SerializeField] private List<GameObject> Tools;
     [SerializeField] private List<GameObject> ToolGhosts;
     private bool ghostSpawned = false;
