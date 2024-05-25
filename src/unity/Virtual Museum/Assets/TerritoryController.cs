@@ -1,9 +1,18 @@
+using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class TerritoryController : MonoBehaviour
 {
     public Material territoryMaterial;
     float time;
+
+    public bool testing = true;
+
+    public List<GameObject> testingVertices1 = new List<GameObject>();
+    public List<GameObject> testingVertices2 = new List<GameObject>();
+
+    private Coroutine testingRoutine;
     
     void Start()
     {
@@ -11,12 +20,55 @@ public class TerritoryController : MonoBehaviour
         Territory.maskTexture2D = new Texture2D(2 * Territory.textureResolution, Territory.textureResolution, TextureFormat.RGBA32, false);
         Territory.maskTexture = new RenderTexture(2 * Territory.textureResolution, Territory.textureResolution, 0);
         Territory.maskTextureCreated = true;
-        Debug.Log("createdTexture");
         territoryMaterial.SetTexture("_MaskTex", Territory.maskTexture);
-        Debug.Log(territoryMaterial.GetTexture("_MaskTex"));
+
+        //create testing Points:
+        new Territory((int)Territory.currentTime, new Vector3(0,0,0), "testTerritory" + Territory.currentTime, "none", Color.blue);
+
+        foreach(var vertex in testingVertices1){
+            Territory.selectedTerritory.AddPointToCurrentBorder(vertex.transform.position, 704, Color.blue);
+        }
+        AdvanceTerritories();
+        Debug.Log("TerritoryTime: " + Territory.currentTime);
+        foreach(var vertex in testingVertices2){
+            Territory.selectedTerritory.AddPointToCurrentBorder(vertex.transform.position, 705, Color.blue);
+        }
+        RegressTerritories();
+        testingRoutine = StartCoroutine(TestingRoutine());
     }
 
+    private IEnumerator TestingRoutine(){
+        while(true){
+            yield return new WaitForSeconds(3f);
+            AdvanceTerritories();
+            foreach(var g in testingVertices2){
+                g.SetActive(true);
+            }
+            foreach(var g in testingVertices1){
+                g.SetActive(false);
+            }
+            yield return new WaitForSeconds(3f);
+            RegressTerritories();
+            foreach(var g in testingVertices1){
+                g.SetActive(true);
+            }
+            foreach(var g in testingVertices2){
+                g.SetActive(false);
+            }
+        }
+    }   
+
     void Update(){
+
+        if(Territory.Territories.Count == 0) {return;}
+        foreach(var territory in Territory.Territories){
+            if(!territory.InterpolateBorders(time)){
+                territory.DrawCurrentTerritory();
+            }
+        }
+        time += Time.deltaTime;
+
+        if(!testing) return;
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -36,17 +88,9 @@ public class TerritoryController : MonoBehaviour
             RegressTerritories();
             Debug.Log("TerritoryTime: " + Territory.currentTime);
         }
-
-        if(Territory.Territories.Count == 0) return;
-        foreach(var territory in Territory.Territories){
-            if(!territory.InterpolateBorders(time)){
-                territory.DrawCurrentTerritory();
-            }
-        }
-        time += Time.deltaTime;
     }
 
-    private void AdvanceTerritories(){
+    public void AdvanceTerritories(){
         if(Territory.Territories.Count == 0) return;
         time = 0;
         foreach(Territory territory in Territory.Territories){
@@ -58,7 +102,7 @@ public class TerritoryController : MonoBehaviour
         }
     }
 
-    private void RegressTerritories(){
+    public void RegressTerritories(){
         if(Territory.Territories.Count == 0) return;
         time = 0;
         foreach(Territory territory in Territory.Territories){

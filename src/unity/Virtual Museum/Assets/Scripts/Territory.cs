@@ -40,7 +40,6 @@ public class Territory : IFlag
         this.info = info;
         Color = color;
         selectedTerritory = this;
-        Debug.Log("Territory created!");
         Territories.Add(this);
     }
 
@@ -61,7 +60,6 @@ public class Territory : IFlag
             ClearMaskTexture();
             return;
         }
-        Debug.Log("Drawing");
         GenerateMaskTexture(currentBorder);
     }
 
@@ -75,7 +73,6 @@ public class Territory : IFlag
             ClearMaskTexture();
             return false;
         }
-
         for(int i = 0; i < interMediateBorder.Points.Count; i ++){
             interMediateBorder.Points[i] = Vector3.Lerp(previousBorder.Points[i], currentBorder.Points[i], t / 2);
         }
@@ -114,11 +111,20 @@ public class Territory : IFlag
 
     private static Vector3 NormalizeToTextureSpace(Vector3 point)
     {
-        // Assuming the plane is centered at the origin
-        float normalizedX = Mathf.InverseLerp(-2f, 2f, -point.x);
-        float normalizedZ = Mathf.InverseLerp(-1f, 1f, -point.z); // Assuming y is up and down, z is forward and back
+        //transform positions to local table transforms and positions -> subtract table transfrom position and rotate according to table rotation
+        //add inverse of tablePosition
+        float newPointX = point.x;
+        float newPointZ = point.z + 2;
+        //rotate inverse of tableRotation around y axis
+        Vector3 newPoint = new Vector3(newPointX, point.y, newPointZ);
+        newPoint = Quaternion.AngleAxis(180, Vector3.up) * newPoint;
+        //normalize point in local position assuming y is up and down, z is forward and back
+        float normalizedX = Mathf.InverseLerp(-2f, 2f, - newPoint.x);
+        float normalizedZ = Mathf.InverseLerp(-1f, 1f, - newPoint.z);
 
-        return new Vector3(normalizedX, point.y, normalizedZ); // y is height, which we don't use for texture
+        Vector3 resultingPoint = new Vector3(normalizedX, point.y, normalizedZ);
+
+        return resultingPoint; // y is height, which we don't use for texture
     }
 
     static void DrawTerritory(TerritoryBorder thisBorder){
@@ -193,11 +199,8 @@ public class Territory : IFlag
             currentBorder = new TerritoryBorder(t, c);
             Borders.Add(currentBorder);
             this.currentBorder = currentBorder;
-            Debug.Log("Created Border! " + t);
+            Debug.Log("Created Border! " + t + " : " +this.currentBorder);
         }
         currentBorder.Points.Add(point);
-        Debug.Log("Point created! " + currentBorder.startTime);
     }
-
-
 }
