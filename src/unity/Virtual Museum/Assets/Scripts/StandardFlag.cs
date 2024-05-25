@@ -47,6 +47,11 @@ public class StandardFlag : IFlag
         Deactivate();
     }
 
+    public static void ResetStatics(){
+        flags = new List<StandardFlag>();
+        currentTime = 700;
+    }
+
     static public bool NextPeriod(){
         //nullable variable for storing potential next period
         int? nextTime = flags

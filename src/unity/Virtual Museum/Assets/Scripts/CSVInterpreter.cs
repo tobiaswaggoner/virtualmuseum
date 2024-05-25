@@ -45,14 +45,6 @@ public class CSVInterpreter : MonoBehaviour
         // TEST -----------------------------------
     }
 
-    private void DrawMapOutline()
-    {
-        lineRenderer.SetPosition(0, topLeftCorner);
-        lineRenderer.SetPosition(1, new Vector3(bottomRightCorner.x, bottomRightCorner.y, topLeftCorner.z));
-        lineRenderer.SetPosition(2, bottomRightCorner);
-        lineRenderer.SetPosition(3, new Vector3(topLeftCorner.x, bottomRightCorner.y, bottomRightCorner.z));
-    }
-
     public void UpdateDesiredCorners(Vector3 newTopLeft, Vector3 newBottomRight)
     {
         topLeftCorner = newTopLeft;
@@ -64,6 +56,7 @@ public class CSVInterpreter : MonoBehaviour
 
     public void CalculateStuff()
     {
+        StandardFlag.ResetStatics();
         // Parsing CSV data
         var records = ParseCSVData(inputText.text);
 
@@ -126,6 +119,7 @@ public class CSVInterpreter : MonoBehaviour
                 var t = s.Split(',');
                 if (t.Length == 2 && float.TryParse(t[0], out float lat) && float.TryParse(t[1], out float lon))
                 {
+                    Debug.Log(lat + " : " +lon);
                     gpsCoordinates.Add(new float[] { lat, lon });
                     points.Add(Instantiate(pointPrefab));
                 }
@@ -180,41 +174,5 @@ public class CSVInterpreter : MonoBehaviour
                 Debug.LogWarning($"Raycast did not hit for position newX: {newX}, newZ: {newZ}");
             }
         }
-    }
-
-
-    public int currentPeriod = 704;
-    public void DisplayFromPeriod(int period = 704, bool up = true)
-    {
-        if (!erscheinungsMap.TryGetValue(period, out var newFlags)) return;
-
-        foreach (var currentFlag in erscheinungsMap[currentPeriod])
-        {
-            if (up)
-            {
-                currentFlag.SetColor(Color.yellow);
-            }
-            else
-            {
-                currentFlag.Deactivate();
-            }
-        }
-
-        StartCoroutine(DisplayMarkersWithDelay(newFlags, 0.1f));
-        currentPeriod = period;
-    }
-
-    private IEnumerator DisplayMarkersWithDelay(List<StandardFlag> markers, float delay)
-    {
-        foreach (var marker in markers)
-        {
-            marker.Activate();
-            yield return new WaitForSeconds(delay);
-        }
-    }
-
-    private void OnApplicationQuit()
-    {
-        StandardFlag.OnDisable();
     }
 }

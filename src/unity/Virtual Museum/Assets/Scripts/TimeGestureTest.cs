@@ -70,7 +70,7 @@ public class TimeGestureTest : MonoBehaviour
         }
 
         void SelectFirstFlag(){
-           interpreter.erscheinungsMap[interpreter.currentPeriod][0].pokeEventInterpreter.Selected();
+           interpreter.erscheinungsMap[StandardFlag.currentTime][0].pokeEventInterpreter.Selected();
         }
     }
 
