@@ -17,6 +17,7 @@ public class Territory : IFlag
     static public List<Territory> Territories = new List<Territory>();
     static public int textureResolution = 255;
     static public float currentTime = 704;
+    private float lastCurrentTime = 0;
     static public bool maskTextureCreated = false;
     static public Territory selectedTerritory;
 
@@ -55,12 +56,15 @@ public class Territory : IFlag
     }
 
     public void DrawCurrentTerritory(){
-        currentBorder = Borders.Find(b => b.startTime == currentTime);
-        if(currentBorder == null || currentBorder.Points.Count == 0) {
-            ClearMaskTexture();
-            return;
+        if(lastCurrentTime != currentTime){
+            currentBorder = Borders.Find(b => b.startTime == currentTime);
+            if(currentBorder == null || currentBorder.Points.Count == 0) {
+                ClearMaskTexture();
+                return;
+            }
         }
         GenerateMaskTexture(currentBorder);
+        lastCurrentTime = currentTime;
     }
 
     public bool InterpolateBorders(float t){
@@ -161,7 +165,7 @@ public class Territory : IFlag
             if (point.y < minY) minY = point.y;
             if (point.y > maxY) maxY = point.y;
         }
-
+       
         // Scanline fill algorithm
         for (int y = minY; y <= maxY; y++)
         {
