@@ -59,7 +59,6 @@ public class Territory : IFlag
         if(lastCurrentTime != currentTime){
             currentBorder = Borders.Find(b => b.startTime == currentTime);
             if(currentBorder == null || currentBorder.Points.Count == 0) {
-                ClearMaskTexture();
                 return;
             }
         }
@@ -74,7 +73,6 @@ public class Territory : IFlag
         || previousBorder == null
         || interMediateBorder.Points.Count == 0 
         || interMediateBorder.Points.Count > currentBorder.Points.Count) {
-            ClearMaskTexture();
             return false;
         }
         for(int i = 0; i < interMediateBorder.Points.Count; i ++){
@@ -96,13 +94,10 @@ public class Territory : IFlag
     }
 
     static void ClearMaskTexture(){
-        Color clearColor = new Color(0,0,0,0);
-        for(int y = 0; y < textureResolution; y ++){
-            for(int x = 0; x < 2*textureResolution; x ++){
-                maskTexture2D.SetPixel(x, y, clearColor);
-            }
-        }
-        maskTexture2D.Apply();
+        
+        maskTexture2D.Reinitialize(1,1);
+        maskTexture2D.SetPixel(0,0,Color.clear);
+        maskTexture2D.Reinitialize(2 * textureResolution, textureResolution);
     }
 
 

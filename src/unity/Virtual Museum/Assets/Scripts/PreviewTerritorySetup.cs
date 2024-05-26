@@ -13,14 +13,15 @@ public class PreviewTerritorySetup : MonoBehaviour
     public TMP_Text timeDisplayTerritory;
     public TMP_Text timeDisplayMarker;
 
-    public bool framerateTest = false;
-
 
     // Start is called before the first frame update
     void Start()
     {
         Territory.ResetStatics();
-        Territory.maskTexture2D = new Texture2D(2 * Territory.textureResolution, Territory.textureResolution, TextureFormat.RGBA32, false);
+        Texture2D tex = new Texture2D(1, 1);
+        tex.SetPixel(0, 0, Color.clear);
+        tex.Reinitialize(2 * Territory.textureResolution, Territory.textureResolution);
+        Territory.maskTexture2D = tex;
         Territory.maskTexture = new RenderTexture(2 * Territory.textureResolution, Territory.textureResolution, 0);
         Territory.maskTextureCreated = true;
         territoryMaterial.SetTexture("_MaskTex", Territory.maskTexture);
