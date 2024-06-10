@@ -1,51 +1,45 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
-using TMPro;
 
 public class TerritoryController : MonoBehaviour
 {
+    bool working = false;
+    float time = 0;
     public Material territoryMaterial;
-    float time;
-    
+    // Start is called before the first frame update
     void Start()
     {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if(!working) return;  
         Territory.ResetStatics();
         Territory.maskTexture2D = new Texture2D(2 * Territory.textureResolution, Territory.textureResolution, TextureFormat.RGBA32, false);
         Territory.maskTexture = new RenderTexture(2 * Territory.textureResolution, Territory.textureResolution, 0);
         Territory.maskTextureCreated = true;
-        territoryMaterial.SetTexture("_MaskTex", Territory.maskTexture);
-    } 
-
-    void Update(){
-        if(Territory.Territories.Count == 0) {return;}
-        foreach(var territory in Territory.Territories){
-            if(!territory.InterpolateBorders(time)){
-                territory.DrawCurrentTerritory();
-            }
-        }
-        time += Time.deltaTime;
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                Vector3 point = hit.point;
-                if(Territory.selectedTerritory == null){
-                    new Territory((int)Territory.currentTime, point, "testTerritory" + Territory.currentTime, "none", Color.red);
-                    return;
-                }
-                Territory.selectedTerritory.AddPointToCurrentBorder(point, (int) Territory.currentTime, Color.blue);
-            }
-        } else if (Input.GetMouseButtonDown(1)){
-            AdvanceTerritories();
-            Debug.Log("TerritoryTime: " + Territory.currentTime);
-        } else if(Input.GetKeyDown(KeyCode.Space)){
-            RegressTerritories();
-            Debug.Log("TerritoryTime: " + Territory.currentTime);
-        }
+        territoryMaterial.SetTexture("_MaskTex", Territory.maskTexture); 
     }
 
+    void SetUp(){
+        Territory.ResetStatics();
+        Texture2D tex = new Texture2D(1, 1);
+        tex.SetPixel(0, 0, Color.clear);
+        tex.Reinitialize(2 * Territory.textureResolution, Territory.textureResolution);
+        Territory.maskTexture2D = tex;
+        Territory.maskTexture = new RenderTexture(2 * Territory.textureResolution, Territory.textureResolution, 0);
+        Territory.maskTextureCreated = true;
+        territoryMaterial.SetTexture("_MaskTex", Territory.maskTexture);
+        //sets Territory.selectedTerritory to itself -> added points via AddPointToCurrentBorder() will be added to this territory at this time
+    }
+
+    void CreateTerritory(Vector3 point, string name, Color color){
+        new Territory((int)Territory.currentTime, point, name + " " + Territory.currentTime, "none", color);
+    }
+    
     public void AdvanceTerritories(){
         if(Territory.Territories.Count == 0) return;
         time = 0;
@@ -69,5 +63,4 @@ public class TerritoryController : MonoBehaviour
             territory.InitializeIntermediatePoints();
         }
     }
-
 }
