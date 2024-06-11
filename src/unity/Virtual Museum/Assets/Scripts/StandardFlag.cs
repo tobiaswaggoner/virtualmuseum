@@ -15,17 +15,21 @@ public class StandardFlag : IFlag
     public int startTime { get; set; }
     static public int currentTime = 700; //704 is the date of the first city
     public static List<StandardFlag> flags = new List<StandardFlag>();
+    public static List<StandardFlag> currentFlags = new List<StandardFlag>();
     public Transform transform {get; set;}
     public Vector3 position { get; set; }
     public GameObject flagVisualTextComponent { get; set; }
     public GameObject flagVisualIndicator { get; set; }
     public string header { get; set; }
     public string info { get; set; }
+
+
     Color flagColor;
     public Transform visualComponentTransform;
     public Transform textTransform;
     public PokeEventInterpreter pokeEventInterpreter;
     private UnityAction<bool> pokedListener;
+
 
     private bool textIsSet = false;
     
@@ -50,6 +54,19 @@ public class StandardFlag : IFlag
     public static void ResetStatics(){
         flags = new List<StandardFlag>();
         currentTime = 700;
+    }
+
+    static public void DisplayBlock(int time){
+        
+        if(currentFlags.Count > 0) {
+            currentFlags.ForEach(flag => flag.Deactivate());
+        }
+
+        currentFlags = flags
+                    .Where(flag => flag.startTime <= time && flag.startTime >= time - 50)
+                    .ToList();
+        currentFlags.ForEach(flag => flag.Activate());
+        currentTime = time;
     }
 
     static public bool NextPeriod(){

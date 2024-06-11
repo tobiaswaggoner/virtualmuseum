@@ -11,4 +11,12 @@ public class ButtonScript : MonoBehaviour
     public void DecreaseTime(){
         StandardFlag.LastPeriod();
     }
+
+    public void DisplayBlock(){
+        StandardFlag.DisplayBlock(int.Parse(gameObject.transform.name));
+    }
+
+    public void DisplayInformation(){
+        
+    }
 }
