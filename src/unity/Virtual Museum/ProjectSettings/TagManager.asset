@@ -8,6 +8,7 @@ TagManager:
   - Table
   - InputsAndLogic
   - Marker
+  - Anchor
   layers:
   - Default
   - TransparentFX
