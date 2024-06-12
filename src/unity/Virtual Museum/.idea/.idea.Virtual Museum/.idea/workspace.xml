@@ -6,13 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="6cd77b99-0a2b-4cb0-ad92-01af511e619b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Virtual Museum/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Virtual Museum/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Table/Table.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Table/Table.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/OVRBuildConfig.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/OVRBuildConfig.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/OVRBuildConfig.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/OVRBuildConfig.asset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Table/TableAnim.anim" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Table/TableAnim.anim" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/OculusRuntimeSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/OculusRuntimeSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/SampleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/SampleScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TableSpawn.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TableSpawn.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ProjectSettings/PackageManagerSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/PackageManagerSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" afterDir="false" />
     </list>
     <list id="1b53e0ad-582e-48a6-80f4-34eec73f6a74" name="Fix" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -24,15 +23,20 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/SpatialAnchorCore.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/YZBillboardScript.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/TableSpawn.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.mrutilitykit@65.0.0/Core/Scripts/AnchorPrefabSpawner.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Editor/OVRProjectSetup/Tasks/Processors/OVRConfigurationTaskUpdaterSummary.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/BuildingBlocks/ControllerButtonsMapperScripts/ControllerButtonsMapper.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/BuildingBlocks/SampleSpatialAnchorControllerScripts/SpatialAnchorLoaderBuildingBlock.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/BuildingBlocks/SampleSpatialAnchorControllerScripts/SpatialAnchorLocalStorageManagerBuildingBlock.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/BuildingBlocks/SampleSpatialAnchorControllerScripts/SpatialAnchorSpawnerBuildingBlock.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/BuildingBlocks/ControllerButtonsMapperScripts/ControllerButtonsMapper.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/BuildingBlocks/SampleSpatialAnchorControllerScripts/SpatialAnchorLoaderBuildingBlock.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/BuildingBlocks/SampleSpatialAnchorControllerScripts/SpatialAnchorLocalStorageManagerBuildingBlock.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/BuildingBlocks/SampleSpatialAnchorControllerScripts/SpatialAnchorSpawnerBuildingBlock.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/BuildingBlocks/SpatialAnchorManagerBlockScripts/SpatialAnchorCoreBuildingBlock.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/OVRCameraRig.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/OVRSpatialAnchor.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/Util/OVREnumerable.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.core@65.0.0/Scripts/Util/OVRObjectPool.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -132,7 +136,8 @@
       <workItem from="1712824326888" duration="5964000" />
       <workItem from="1716236800433" duration="6257000" />
       <workItem from="1718065792866" duration="1041000" />
-      <workItem from="1718068928616" duration="4268000" />
+      <workItem from="1718068928616" duration="4921000" />
+      <workItem from="1718210833627" duration="10315000" />
     </task>
     <task id="LOCAL-00001">
       <option name="closed" value="true" />

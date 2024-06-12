@@ -190,14 +190,13 @@ MonoBehaviour:
     Callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 459257698}
-          m_TargetAssemblyTypeName: Meta.XR.BuildingBlocks.SpatialAnchorSpawnerBuildingBlock,
-            Meta.XR.BuildingBlocks
-          m_MethodName: SpawnSpatialAnchor
-          m_Mode: 0
+        - m_Target: {fileID: 843920381}
+          m_TargetAssemblyTypeName: TableSpawn, Assembly-CSharp
+          m_MethodName: CreateSpatialAnchor
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: 
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
             m_IntArgument: 0
             m_FloatArgument: 0
             m_StringArgument: 
@@ -209,14 +208,13 @@ MonoBehaviour:
     Callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 459257697}
-          m_TargetAssemblyTypeName: Meta.XR.BuildingBlocks.SpatialAnchorLoaderBuildingBlock,
-            Meta.XR.BuildingBlocks
-          m_MethodName: LoadAnchorsFromDefaultLocalStorage
-          m_Mode: 0
+        - m_Target: {fileID: 843920381}
+          m_TargetAssemblyTypeName: TableSpawn, Assembly-CSharp
+          m_MethodName: LoadSpatialAnchor
+          m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: 
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
             m_IntArgument: 0
             m_FloatArgument: 0
             m_StringArgument: 
@@ -243,7 +241,7 @@ MonoBehaviour:
           m_CallState: 2
   - Title: Spawn Table on Anchor
     Button: 8192
-    ButtonMode: 1
+    ButtonMode: 0
     Callback:
       m_PersistentCalls:
         m_Calls:
@@ -259,6 +257,24 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+  - Title: Spawn spatial anchor
+    Button: 1
+    ButtonMode: 0
+    Callback:
+      m_PersistentCalls:
+        m_Calls: []
+  - Title: Load and spawn spatial anchors
+    Button: 2
+    ButtonMode: 0
+    Callback:
+      m_PersistentCalls:
+        m_Calls: []
+  - Title: Erase all spatial anchors
+    Button: 32768
+    ButtonMode: 0
+    Callback:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!4 &63257422
 Transform:
   m_ObjectHideFlags: 0
@@ -617,7 +633,7 @@ MonoBehaviour:
   virtualGreenScreenDepthTolerance: 0.2
   mrcActivationMode: 0
   launchSimultaneousHandsControllersOnStartup: 0
-  isInsightPassthroughEnabled: 0
+  isInsightPassthroughEnabled: 1
   requestBodyTrackingPermissionOnStartup: 0
   requestFaceTrackingPermissionOnStartup: 0
   requestEyeTrackingPermissionOnStartup: 0
@@ -1370,7 +1386,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &459257696
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5787,6 +5803,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   table: {fileID: 7385101694855767235, guid: 52006d526ed4e664d9c91c3e65fdc4ac, type: 3}
+  anchorPrefab: {fileID: 789684486510353890, guid: 2fe8d31f00c9f0f4a846e82b1bcae777, type: 3}
+  cameraRig: {fileID: 192252991}
 --- !u!1 &880974582
 GameObject:
   m_ObjectHideFlags: 0
@@ -5965,7 +5983,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 951632366}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
   m_Name: 
@@ -7408,7 +7426,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1649412112
 MonoBehaviour:
   m_ObjectHideFlags: 0
