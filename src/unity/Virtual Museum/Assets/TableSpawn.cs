@@ -32,7 +32,7 @@ public class TableSpawn : MonoBehaviour
             return;
         }
 
-        Instantiate(table, new Vector3(anchor.transform.position.x, -1.4f, anchor.transform.position.z), Quaternion.Euler(0, anchor.transform.rotation.eulerAngles.y, 0));
+        Instantiate(table, new Vector3(anchor.transform.position.x, 0f, anchor.transform.position.z), Quaternion.Euler(0, anchor.transform.rotation.eulerAngles.y, 0));
         gameObject.SetActive(false);
     }
 
@@ -48,7 +48,6 @@ public class TableSpawn : MonoBehaviour
 
     public void LoadSpatialAnchor()
     {
-        Debug.Log("Pressed Load Button!");
         var g = LoadGuid()[0];
         anchorGuid = g;
         LoadAnchorByUuid(new List<Guid>(){anchorGuid});
@@ -70,7 +69,7 @@ public class TableSpawn : MonoBehaviour
 
         Debug.Log("Trying to save anchor!");
         var save = AnchorSave(ovrAnchor);
-        float saveTimeout = Time.time + 5f; // 10-second timeout for save operation
+        float saveTimeout = Time.time + 5f; // 5-second timeout for save operation
         while (!save.IsCompleted)
         {
             if (Time.time > saveTimeout)
@@ -83,9 +82,7 @@ public class TableSpawn : MonoBehaviour
 
         if (save.Status == TaskStatus.RanToCompletion)
         {
-            Debug.Log($"Save completed successfully: {save.Status}");
             anchor = ovrAnchor;
-            SaveGuid(anchor.Uuid);
         }
     }
 
@@ -165,9 +162,8 @@ public class TableSpawn : MonoBehaviour
     public List<Guid> LoadGuid()
     {
         // Get the string from PlayerPrefs
-        Debug.Log("Getting from PlayerPrefs!");
         string guidString = PlayerPrefs.GetString(PlayerPrefsKey, string.Empty);
-        Debug.Log("Read PlayerPrefs!");
+        Debug.Log($"Read PlayerPrefs! GUID: {guidString}");
 
         // If the string is empty, return a new list
         if (string.IsNullOrEmpty(guidString))
