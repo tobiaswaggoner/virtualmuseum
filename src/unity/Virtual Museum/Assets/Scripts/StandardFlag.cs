@@ -160,7 +160,7 @@ public class StandardFlag : IFlag
     }
 
     public void Deactivate() {
-        if(visualComponentTransform == null) visualComponentTransform = transform.GetChild(0);
+        if(visualComponentTransform == null) return;
         visualComponentTransform.gameObject.SetActive(false);
     }
 
