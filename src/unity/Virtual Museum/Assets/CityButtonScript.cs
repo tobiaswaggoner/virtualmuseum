@@ -1,16 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CityButtonScript : MonoBehaviour
 {
     public StandardFlag personalStandardFlag;
+    private bool isCityShowing = false;
 
     public void DisplayCity(){
-        personalStandardFlag.transform.GetComponentInChildren<LineRenderer>().enabled = true;
+        if(isCityShowing) {
+            isCityShowing = false;
+            personalStandardFlag.HideLineRenderer();
+            personalStandardFlag.HideText();
+        } else {
+            isCityShowing = true;
+            personalStandardFlag.ShowText();
+            personalStandardFlag.ShowLineRenderer();
+        }
     }
 
     public void HideCity(){
-        personalStandardFlag.transform.GetComponentInChildren<LineRenderer>().enabled = false;
+        personalStandardFlag.HideLineRenderer();
+        personalStandardFlag.HideText();
     }
 }

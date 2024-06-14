@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class CityListScript : MonoBehaviour
@@ -10,6 +11,9 @@ public class CityListScript : MonoBehaviour
         CityButtonScript cityButtonScript = Instantiate(uiCityPrefab, transform).GetComponent<CityButtonScript>();
         cityButtonScripts.Add(cityButtonScript);
         cityButtonScript.personalStandardFlag = backlinkFlag;
+        cityButtonScript.transform.GetComponentInChildren<TMP_Text>().text = backlinkFlag.header;
+
+        cityButtonScripts[0].DisplayCity();
     }
 
     public void ClearCities(){

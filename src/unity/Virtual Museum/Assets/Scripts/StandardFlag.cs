@@ -31,6 +31,7 @@ public class StandardFlag : IFlag
     public Transform textTransform;
     public PokeEventInterpreter pokeEventInterpreter;
     private UnityAction<bool> pokedListener;
+    public LineRenderer lineRenderer;
 
 
     private bool textIsSet = false;
@@ -43,13 +44,13 @@ public class StandardFlag : IFlag
         this.info = info;
         this.flagColor = flagColor;
         
-        cityListScript = GameObject.Find("CityList").GetComponent<CityListScript>();
         visualComponentTransform = transform.GetChild(0);
         // Debug.Log(visualComponentTransform.name);
         textTransform = transform.GetChild(1);
         pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
         pokedListener = new UnityAction<bool>(EventCallback);
         pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
+        lineRenderer = transform.GetComponentInChildren<LineRenderer>();
         flags.Add(this);
         Deactivate();
     }
@@ -61,6 +62,7 @@ public class StandardFlag : IFlag
 
     static public void DisplayBlock(int time){
         int latestStartTime = 0;
+        if(cityListScript == null) cityListScript = GameObject.Find("CityList").GetComponent<CityListScript>();
         if(currentFlags.Count > 0) {
             currentFlags.ForEach(flag => flag.Deactivate());
             cityListScript.ClearCities();
@@ -158,12 +160,29 @@ public class StandardFlag : IFlag
     }
 
     public void Deactivate() {
+        if(visualComponentTransform == null) visualComponentTransform = transform.GetChild(0);
         visualComponentTransform.gameObject.SetActive(false);
     }
 
     public void ShowText() {
         if(!textIsSet) SetText();
+        foreach(var f in currentFlags){
+            f.textTransform.gameObject.SetActive(false);
+        }
         textTransform.gameObject.SetActive(true);
+    }
+
+    public void ShowLineRenderer(){
+        foreach(var f in currentFlags){
+            f.lineRenderer.enabled = false;
+        }
+        lineRenderer.enabled = true;
+        lineRenderer.SetPosition(0, transform.position);
+        lineRenderer.SetPosition(1, transform.position + Vector3.up);
+    }
+
+    public void HideLineRenderer(){
+        lineRenderer.enabled = false;
     }
 
     public void HideText() {
