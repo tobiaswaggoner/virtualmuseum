@@ -11,13 +11,16 @@ public class TableSpawn : MonoBehaviour
     [SerializeField] private GameObject table;
     [SerializeField] private GameObject anchorPrefab;
     [SerializeField] private OVRCameraRig cameraRig;
-    [SerializeField] private List<Guid> anchorGuids;
+    private Guid anchorGuid;
+    [SerializeField] private string debugGuid;
     private OVRSpatialAnchor anchor;
-    private List<OVRSpatialAnchor.UnboundAnchor> _unboundAnchors = new();
+    private List<OVRSpatialAnchor.UnboundAnchor> unboundAnchors;
+    private TableGhost tableGhostScript;
 
     private void Start()
     {
-        anchorGuids = LoadGuidList();
+        tableGhostScript = GetComponent<TableGhost>();
+        unboundAnchors = new List<OVRSpatialAnchor.UnboundAnchor>();
     }
 
     public void SpawnTableOnAnchor()
@@ -29,28 +32,26 @@ public class TableSpawn : MonoBehaviour
             return;
         }
 
-        Instantiate(table, new Vector3(anchor.transform.position.x, 0f, anchor.transform.position.z), Quaternion.Euler(0, anchor.transform.rotation.eulerAngles.y, 0));
+        Instantiate(table, new Vector3(anchor.transform.position.x, -1.4f, anchor.transform.position.z), Quaternion.Euler(0, anchor.transform.rotation.eulerAngles.y, 0));
         gameObject.SetActive(false);
     }
 
     public void CreateSpatialAnchor()
     {
-        if (anchor != null) return;
+        if (anchor != null || !tableGhostScript.ghost) return;
         
-        var anchorSpawn = Instantiate(anchorPrefab, cameraRig.rightControllerInHandAnchor.position,
-            Quaternion.Euler(0, cameraRig.rightControllerInHandAnchor.rotation.eulerAngles.y, 0));
+        var anchorSpawn = Instantiate(anchorPrefab, tableGhostScript.GetGhostPosition(),
+            tableGhostScript.GetGhostRotation());
         Debug.Log("Initialization process started!");
        StartCoroutine(AnchorCreation(anchorSpawn.AddComponent<OVRSpatialAnchor>()));
     }
 
     public void LoadSpatialAnchor()
     {
-        if (anchorGuids.Count == 0)
-        {
-            Debug.Log("No Anchors saved!");
-        }
-        
-        LoadAnchorByUuid(anchorGuids);
+        Debug.Log("Pressed Load Button!");
+        var g = LoadGuid()[0];
+        anchorGuid = g;
+        LoadAnchorByUuid(new List<Guid>(){anchorGuid});
     }
 
     private IEnumerator AnchorCreation(OVRSpatialAnchor ovrAnchor)
@@ -60,16 +61,32 @@ public class TableSpawn : MonoBehaviour
             yield return null;
         }
 
-        if (anchorGuids.Count > 0)
+        if (anchorGuid != Guid.Empty)
         {
-            var erase = AnchorErase(anchorGuids);
+            var erase = AnchorErase(new List<Guid>(){anchorGuid});
             while (!erase.IsCompleted) yield return null;
             Debug.Log("Erased!");
         }
 
         Debug.Log("Trying to save anchor!");
-        AnchorSave(ovrAnchor);
-        anchor = ovrAnchor;
+        var save = AnchorSave(ovrAnchor);
+        float saveTimeout = Time.time + 5f; // 10-second timeout for save operation
+        while (!save.IsCompleted)
+        {
+            if (Time.time > saveTimeout)
+            {
+                Debug.Log("Saving anchor timed out.");
+                yield break;
+            }
+            yield return null;
+        }
+
+        if (save.Status == TaskStatus.RanToCompletion)
+        {
+            Debug.Log($"Save completed successfully: {save.Status}");
+            anchor = ovrAnchor;
+            SaveGuid(anchor.Uuid);
+        }
     }
 
     private async Task AnchorSave(OVRSpatialAnchor a)
@@ -78,12 +95,12 @@ public class TableSpawn : MonoBehaviour
         if (result.Success)
         {
             Debug.Log($"Saved {a.Uuid}"!);
-            anchorGuids.Add(a.Uuid);
-            SaveGuidList(anchorGuids);
+            anchorGuid = a.Uuid;
+            SaveGuid(anchorGuid);
         }
         else
         {
-            Debug.LogError($"Failed to save {a.Uuid}!: {result.Status}");
+            Debug.Log($"Failed to save {a.Uuid}!: {result.Status}");
         }
     }
 
@@ -93,7 +110,7 @@ public class TableSpawn : MonoBehaviour
         if (result.Success)
         {
             Debug.Log($"Erased {uuids}"!);
-            anchorGuids.Clear();
+            anchorGuid = Guid.Empty;
         }
         else
         {
@@ -103,7 +120,7 @@ public class TableSpawn : MonoBehaviour
 
     private async void LoadAnchorByUuid(IEnumerable<Guid> uuids)
     {
-        var result = await OVRSpatialAnchor.LoadUnboundAnchorsAsync(uuids, _unboundAnchors);
+        var result = await OVRSpatialAnchor.LoadUnboundAnchorsAsync(uuids, unboundAnchors);
 
         if (result.Success)
         {
@@ -137,49 +154,34 @@ public class TableSpawn : MonoBehaviour
         }
     }
 
-    public void SaveGuidList(List<Guid> guidList)
+    public void SaveGuid(Guid guid)
     {
-        // Convert the list of Guids to a single string, with each Guid separated by a delimiter (e.g., ',')
-        string guidString = string.Join(",", guidList.ConvertAll(g => g.ToString()).ToArray());
-
-        // Save the string in PlayerPrefs
-        PlayerPrefs.SetString(PlayerPrefsKey, guidString);
+        PlayerPrefs.SetString(PlayerPrefsKey, guid.ToString());
         PlayerPrefs.Save();
 
-        Debug.Log("Guid list saved successfully.");
+        Debug.Log("Guid saved successfully.");
     }
 
-    public List<Guid> LoadGuidList()
+    public List<Guid> LoadGuid()
     {
         // Get the string from PlayerPrefs
+        Debug.Log("Getting from PlayerPrefs!");
         string guidString = PlayerPrefs.GetString(PlayerPrefsKey, string.Empty);
+        Debug.Log("Read PlayerPrefs!");
 
         // If the string is empty, return a new list
         if (string.IsNullOrEmpty(guidString))
         {
-            Debug.LogWarning("No Guid list found, returning a new list.");
+            Debug.Log("No Guid found, returning a new list.");
+            anchorGuid = Guid.Empty;
             return new List<Guid>();
         }
+        
+        var guidList = new List<Guid>();
+        debugGuid = guidString;
+        guidList.Add(Guid.Parse(guidString));
 
-        try
-        {
-            // Split the string into an array of Guid strings
-            string[] guidStrings = guidString.Split(',');
-
-            // Convert each Guid string back into a Guid object
-            List<Guid> guidList = new List<Guid>();
-            foreach (string guidStr in guidStrings)
-            {
-                guidList.Add(Guid.Parse(guidStr));
-            }
-
-            Debug.Log("Guid list loaded successfully.");
-            return guidList;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Failed to load guid list: " + e.Message);
-            return new List<Guid>();
-        }
+        Debug.Log("Guid loaded successfully.");
+        return guidList; 
     }
 }
