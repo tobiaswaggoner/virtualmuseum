@@ -61,10 +61,11 @@ public class StandardFlag : IFlag
         if(currentFlags.Count > 0) {
             currentFlags.ForEach(flag => flag.Deactivate());
         }
-
+        int latestStartTime = currentFlags[currentFlags.Count - 1].startTime;
         currentFlags = flags
-                    .Where(flag => flag.startTime <= time && flag.startTime >= time - 50)
+                    .Where(flag => flag.startTime <= time && flag.startTime >= latestStartTime)
                     .ToList();
+        currentFlags.Sort((flag1, flag2) => flag1.startTime.CompareTo(flag2.startTime));
         currentFlags.ForEach(flag => flag.Activate());
         currentTime = time;
     }
