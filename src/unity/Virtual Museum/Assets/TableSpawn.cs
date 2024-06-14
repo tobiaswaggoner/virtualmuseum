@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -38,7 +39,13 @@ public class TableSpawn : MonoBehaviour
 
     public void CreateSpatialAnchor()
     {
-        if (anchor != null || !tableGhostScript.ghost) return;
+        if (!tableGhostScript.ghost) return;
+
+        if (anchor != null)
+        {
+            Destroy(anchor.gameObject);
+            anchor = null;
+        }
         
         var anchorSpawn = Instantiate(anchorPrefab, tableGhostScript.GetGhostPosition(),
             tableGhostScript.GetGhostRotation());
@@ -64,7 +71,6 @@ public class TableSpawn : MonoBehaviour
         {
             var erase = AnchorErase(new List<Guid>(){anchorGuid});
             while (!erase.IsCompleted) yield return null;
-            Debug.Log("Erased!");
         }
 
         Debug.Log("Trying to save anchor!");
@@ -106,7 +112,7 @@ public class TableSpawn : MonoBehaviour
         var result = await OVRSpatialAnchor.EraseAnchorsAsync(null, uuids);
         if (result.Success)
         {
-            Debug.Log($"Erased {uuids}"!);
+            Debug.Log($"Erased {string.Join(", ", uuids.Select(guid => guid.ToString()).ToArray())}"!);
             anchorGuid = Guid.Empty;
         }
         else
