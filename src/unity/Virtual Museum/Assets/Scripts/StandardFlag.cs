@@ -14,10 +14,11 @@ using Unity.VisualScripting;
 public class StandardFlag : IFlag
 {
     public int startTime { get; set; }
-    static public int currentTime = 700; //704 is the date of the first city
+    public static int currentTime = 700; //704 is the date of the first city
     public static List<StandardFlag> flags = new List<StandardFlag>();
     public static List<StandardFlag> currentFlags = new List<StandardFlag>();
     public static CityListScript cityListScript;
+    public static StandardFlag selectedFlag;
     public Transform transform {get; set;}
     public Vector3 position { get; set; }
     public GameObject flagVisualTextComponent { get; set; }
@@ -29,7 +30,6 @@ public class StandardFlag : IFlag
     Color flagColor;
     public Transform visualComponentTransform;
     public Transform textTransform;
-    public PokeEventInterpreter pokeEventInterpreter;
     private UnityAction<bool> pokedListener;
     public LineRenderer lineRenderer;
 
@@ -48,10 +48,8 @@ public class StandardFlag : IFlag
         visualComponentTransform = transform.GetChild(0);
         // Debug.Log(visualComponentTransform.name);
         textTransform = transform.GetChild(1);
-        pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
         pokedListener = new UnityAction<bool>(EventCallback);
         if(image != null) {
-            pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
             SetColor(Color.blue);
         }
         lineRenderer = transform.GetComponentInChildren<LineRenderer>();
@@ -168,12 +166,21 @@ public class StandardFlag : IFlag
         visualComponentTransform.gameObject.SetActive(false);
     }
 
+    public void ShowCubeMap(){
+        image.SetActive(true);
+    }
+
+    public void HideCubeMap(){
+        image.SetActive(false);
+    }
+
     public void ShowText() {
         if(!textIsSet) SetText();
         foreach(var f in currentFlags){
             f.textTransform.gameObject.SetActive(false);
         }
         textTransform.gameObject.SetActive(true);
+        selectedFlag = this;
     }
 
     public void ShowLineRenderer(){
@@ -203,10 +210,6 @@ public class StandardFlag : IFlag
 
     public static void OnDisable()
     {
-        foreach (var f in flags)
-        {
-            f.pokeEventInterpreter.UnregisterForPokedEvent(f.pokedListener);
-        }
         flags.Clear();
         currentTime = 700;
     }
