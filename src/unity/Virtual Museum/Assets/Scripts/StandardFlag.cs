@@ -6,6 +6,7 @@ using UnityEngine.Events;
 using System.Linq;
 using UnityEditor;
 using UnityEngine.Timeline;
+using Unity.VisualScripting;
 
 ///A standard flag for displaying information about a point of interest
 ///Has start and endTime for defining first mention and last seen documentation of the point of interest as well as Color attribute for 
@@ -15,17 +16,23 @@ public class StandardFlag : IFlag
     public int startTime { get; set; }
     static public int currentTime = 700; //704 is the date of the first city
     public static List<StandardFlag> flags = new List<StandardFlag>();
+    public static List<StandardFlag> currentFlags = new List<StandardFlag>();
+    public static CityListScript cityListScript;
     public Transform transform {get; set;}
     public Vector3 position { get; set; }
     public GameObject flagVisualTextComponent { get; set; }
     public GameObject flagVisualIndicator { get; set; }
     public string header { get; set; }
     public string info { get; set; }
+
+
     Color flagColor;
     public Transform visualComponentTransform;
     public Transform textTransform;
     public PokeEventInterpreter pokeEventInterpreter;
     private UnityAction<bool> pokedListener;
+    public LineRenderer lineRenderer;
+
 
     private bool textIsSet = false;
     
@@ -43,6 +50,7 @@ public class StandardFlag : IFlag
         pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
         pokedListener = new UnityAction<bool>(EventCallback);
         pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
+        lineRenderer = transform.GetComponentInChildren<LineRenderer>();
         flags.Add(this);
         Deactivate();
     }
@@ -50,6 +58,29 @@ public class StandardFlag : IFlag
     public static void ResetStatics(){
         flags = new List<StandardFlag>();
         currentTime = 700;
+    }
+
+    static public void DisplayBlock(int time){
+        int latestStartTime = 0;
+        if(cityListScript == null) cityListScript = GameObject.Find("CityList").GetComponent<CityListScript>();
+        if(currentFlags.Count > 0) {
+            currentFlags.ForEach(flag => flag.Deactivate());
+            cityListScript.ClearCities();
+            latestStartTime = currentFlags[currentFlags.Count - 1].startTime;
+        }
+        
+        currentFlags = flags
+                    .Where(flag => flag.startTime <= time && flag.startTime >= latestStartTime)
+                    .ToList();
+        currentFlags.Sort((flag1, flag2) => flag1.startTime.CompareTo(flag2.startTime));
+        currentFlags.ForEach(flag => {
+            flag.Activate();
+            cityListScript.CreateCityUIRepresentation(flag);
+            });
+        currentTime = time;
+
+        //Display markers with buttons linked to marker on UI. Upon UI button press, display marker information
+
     }
 
     static public bool NextPeriod(){
@@ -129,12 +160,29 @@ public class StandardFlag : IFlag
     }
 
     public void Deactivate() {
+        if(visualComponentTransform == null) return;
         visualComponentTransform.gameObject.SetActive(false);
     }
 
     public void ShowText() {
         if(!textIsSet) SetText();
+        foreach(var f in currentFlags){
+            f.textTransform.gameObject.SetActive(false);
+        }
         textTransform.gameObject.SetActive(true);
+    }
+
+    public void ShowLineRenderer(){
+        foreach(var f in currentFlags){
+            f.lineRenderer.enabled = false;
+        }
+        lineRenderer.enabled = true;
+        lineRenderer.SetPosition(0, transform.position);
+        lineRenderer.SetPosition(1, transform.position + Vector3.up);
+    }
+
+    public void HideLineRenderer(){
+        lineRenderer.enabled = false;
     }
 
     public void HideText() {
