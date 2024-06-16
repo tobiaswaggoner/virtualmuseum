@@ -24,7 +24,7 @@ public class StandardFlag : IFlag
     public GameObject flagVisualIndicator { get; set; }
     public string header { get; set; }
     public string info { get; set; }
-
+    public GameObject image { get; set; }
 
     Color flagColor;
     public Transform visualComponentTransform;
@@ -36,20 +36,24 @@ public class StandardFlag : IFlag
 
     private bool textIsSet = false;
     
-    public StandardFlag(int startTime, Vector3 position, Transform transform, Color flagColor, string header = "test", string info = "no new info"){
+    public StandardFlag(int startTime, Vector3 position, Transform transform, Color flagColor, string header = "test", string info = "no new info", GameObject image = null) {
         this.startTime = startTime;
         this.transform = transform;
         this.position = position;
         this.header = header;
         this.info = info;
         this.flagColor = flagColor;
+        this.image = image;
         
         visualComponentTransform = transform.GetChild(0);
         // Debug.Log(visualComponentTransform.name);
         textTransform = transform.GetChild(1);
         pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
         pokedListener = new UnityAction<bool>(EventCallback);
-        pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
+        if(image != null) {
+            pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
+            SetColor(Color.blue);
+        }
         lineRenderer = transform.GetComponentInChildren<LineRenderer>();
         flags.Add(this);
         Deactivate();
