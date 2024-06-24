@@ -17,6 +17,8 @@ public class StandardFlag : IFlag
     static public int currentTime = 700; //704 is the date of the first city
     public static List<StandardFlag> flags = new List<StandardFlag>();
     public static List<StandardFlag> currentFlags = new List<StandardFlag>();
+    public static List<AudioSource> audioSources = new List<AudioSource>();
+    
     public static CityListScript cityListScript;
     public Transform transform {get; set;}
     public Vector3 position { get; set; }
@@ -57,6 +59,7 @@ public class StandardFlag : IFlag
 
     public static void ResetStatics(){
         flags = new List<StandardFlag>();
+        audioSources = new List<AudioSource>();
         currentTime = 700;
     }
 
@@ -80,7 +83,12 @@ public class StandardFlag : IFlag
         currentTime = time;
 
         //Display markers with buttons linked to marker on UI. Upon UI button press, display marker information
+    }
 
+    static public void HideBlock(){
+        currentFlags.ForEach(flag => flag.Deactivate());
+        cityListScript.ClearCities();
+        currentFlags = new List<StandardFlag>();
     }
 
     static public bool NextPeriod(){
@@ -154,7 +162,18 @@ public class StandardFlag : IFlag
         visualComponentTransform.gameObject.SetActive(true);
         Animator animator = visualComponentTransform.GetComponent<Animator>();
         AudioSource audioSource = visualComponentTransform.GetComponent<AudioSource>();
-        audioSource.Play();
+        if(!audioSources.Contains(audioSource)){
+            audioSources.Add(audioSource);
+        }
+        bool isPlaying = false;
+        foreach(var a in audioSources){
+            if(a.isPlaying){
+                isPlaying = true;
+                break;
+            }
+        }
+        if(!isPlaying) audioSource.Play();
+        
         animator.Play("Base Layer.MarkerAnim", 0, 0);
         SetColor(Color.red);
     }
