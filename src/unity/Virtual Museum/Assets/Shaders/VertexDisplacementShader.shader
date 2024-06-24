@@ -43,6 +43,9 @@ Shader "Custom/HeightMapDeformSurface"
             fixed4 baseColor = tex2D(_MainTex, IN.uv_MainTex);
             
             fixed4 maskColor = tex2D(_MaskTex, IN.uv_MaskTex);
+            if(maskColor.r == 0){
+                maskColor = fixed4(1,1,1,1);
+            }
 
             fixed4 finalColor = lerp(baseColor, maskColor, _BlendFactor * maskColor.a);
             

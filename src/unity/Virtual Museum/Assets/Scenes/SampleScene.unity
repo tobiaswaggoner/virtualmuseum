@@ -12808,7 +12808,7 @@ MonoBehaviour:
   desiredWidth: 6
   desiredHeight: 3
   lineRenderer: {fileID: 951632371}
-  pointPrefab: {fileID: 6262266410090804735, guid: 0b946e4953b1ab54db5bfb1c091db453, type: 3}
+  pointPrefab: {fileID: 3986729018367164808, guid: da183cdd887d7d6408ce6f21535fe408, type: 3}
   inputText: {fileID: 4900000, guid: 33a54012c07400448a5f0393ddcd71c5, type: 3}
   points: []
 --- !u!114 &963692608 stripped
