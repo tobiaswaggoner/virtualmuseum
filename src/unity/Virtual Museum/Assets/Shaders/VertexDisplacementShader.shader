@@ -5,7 +5,7 @@ Shader "Custom/HeightMapDeformSurface"
         _MainTex ("Texture", 2D) = "white" {}
         _HeightMap ("Height Map", 2D) = "black" {}
         _HeightScale ("Height Scale", Float) = 1.0
-        _MaskTex ("Mask texture", 2D) = "white" {}
+        _MaskTex ("Mask texture", 2D) = "transparent" {}
         _BlendFactor ("Blend Factor", Range(0,1)) = 0.5
     }
     SubShader
@@ -43,9 +43,6 @@ Shader "Custom/HeightMapDeformSurface"
             fixed4 baseColor = tex2D(_MainTex, IN.uv_MainTex);
             
             fixed4 maskColor = tex2D(_MaskTex, IN.uv_MaskTex);
-            if(maskColor.r == 0){
-                maskColor = fixed4(1,1,1,1);
-            }
 
             fixed4 finalColor = lerp(baseColor, maskColor, _BlendFactor * maskColor.a);
             
