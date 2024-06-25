@@ -181,6 +181,7 @@ public class StandardFlag : IFlag
     public void Deactivate() {
         if(visualComponentTransform == null) return;
         visualComponentTransform.gameObject.SetActive(false);
+        visualComponentTransform.GetComponent<InstantiateMarkerVisual>().DeactivateMarker();
     }
 
     public void ShowText() {
