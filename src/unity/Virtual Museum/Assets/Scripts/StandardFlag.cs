@@ -197,8 +197,8 @@ public class StandardFlag : IFlag
             f.lineRenderer.enabled = false;
         }
         lineRenderer.enabled = true;
-        lineRenderer.SetPosition(0, transform.position);
-        lineRenderer.SetPosition(1, transform.position + Vector3.up);
+        lineRenderer.SetPosition(0, transform.position + Vector3.up * 0.277f);
+        lineRenderer.SetPosition(1, transform.position + Vector3.up * 1.3f);
     }
 
     public void HideLineRenderer(){
