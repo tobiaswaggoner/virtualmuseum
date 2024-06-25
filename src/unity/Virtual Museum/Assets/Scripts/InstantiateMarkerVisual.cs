@@ -13,6 +13,7 @@ public class InstantiateMarkerVisual : MonoBehaviour
     {
         if(instantiated){
             AcitvateMarker();
+            return;
         }
         Debug.Log("instantiating marker");
         int index = Random.Range(0, viusals.Count);

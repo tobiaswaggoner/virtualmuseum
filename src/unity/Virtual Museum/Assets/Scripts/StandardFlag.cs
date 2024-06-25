@@ -55,6 +55,7 @@ public class StandardFlag : IFlag
             SetColor(Color.blue);
         }
         lineRenderer = transform.GetComponentInChildren<LineRenderer>();
+        lineRenderer.enabled = false;
         flags.Add(this);
         Deactivate();
     }
@@ -205,14 +206,17 @@ public class StandardFlag : IFlag
 
     public void ShowLineRenderer(){
         foreach(var f in currentFlags){
+            if(!f.lineRenderer) continue;
             f.lineRenderer.enabled = false;
         }
+        if(!lineRenderer) return;
         lineRenderer.enabled = true;
-        lineRenderer.SetPosition(0, transform.position + Vector3.up * 0.277f);
+        lineRenderer.SetPosition(0, transform.position + Vector3.up * 0.25f);
         lineRenderer.SetPosition(1, transform.position + Vector3.up * 1.3f);
     }
 
     public void HideLineRenderer(){
+        if(!lineRenderer) return;
         lineRenderer.enabled = false;
     }
 

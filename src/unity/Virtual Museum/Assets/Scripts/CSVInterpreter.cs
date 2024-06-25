@@ -26,8 +26,6 @@ public class CSVInterpreter : MonoBehaviour
     private Vector3 topLeftCorner = Vector3.zero;
     private Vector3 bottomRightCorner = Vector3.zero;
 
-    public LineRenderer lineRenderer;
-
     public GameObject pointPrefab;
 
     public TextAsset inputText;
@@ -76,7 +74,6 @@ public class CSVInterpreter : MonoBehaviour
         PlaceMarkers(records, gpsCoordinates);
 
         calculatedStuff = true;
-        lineRenderer.enabled = true;
     }
 
     private (List<int> ersterwähnungen, List<string> ort, List<string> landkreis, List<string> gpsOld) ParseCSVData(string csvText)
