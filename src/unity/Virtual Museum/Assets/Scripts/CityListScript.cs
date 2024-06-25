@@ -13,7 +13,9 @@ public class CityListScript : MonoBehaviour
         cityButtonScript.personalStandardFlag = backlinkFlag;
         cityButtonScript.transform.GetComponentInChildren<TMP_Text>().text = backlinkFlag.header;
 
+        //test
         cityButtonScripts[0].DisplayCity();
+        //test
     }
 
     public void ClearCities(){

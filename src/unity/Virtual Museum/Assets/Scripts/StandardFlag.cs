@@ -14,44 +14,46 @@ using Unity.VisualScripting;
 public class StandardFlag : IFlag
 {
     public int startTime { get; set; }
-    static public int currentTime = 700; //704 is the date of the first city
+    public static int currentTime = 700; //704 is the date of the first city
     public static List<StandardFlag> flags = new List<StandardFlag>();
     public static List<StandardFlag> currentFlags = new List<StandardFlag>();
     public static List<AudioSource> audioSources = new List<AudioSource>();
     
     public static CityListScript cityListScript;
+    public static StandardFlag selectedFlag;
     public Transform transform {get; set;}
     public Vector3 position { get; set; }
     public GameObject flagVisualTextComponent { get; set; }
     public GameObject flagVisualIndicator { get; set; }
     public string header { get; set; }
     public string info { get; set; }
-
+    public GameObject image { get; set; }
 
     Color flagColor;
     public Transform visualComponentTransform;
     public Transform textTransform;
-    public PokeEventInterpreter pokeEventInterpreter;
     private UnityAction<bool> pokedListener;
     public LineRenderer lineRenderer;
 
 
     private bool textIsSet = false;
     
-    public StandardFlag(int startTime, Vector3 position, Transform transform, Color flagColor, string header = "test", string info = "no new info"){
+    public StandardFlag(int startTime, Vector3 position, Transform transform, Color flagColor, string header = "test", string info = "no new info", GameObject image = null) {
         this.startTime = startTime;
         this.transform = transform;
         this.position = position;
         this.header = header;
         this.info = info;
         this.flagColor = flagColor;
+        this.image = image;
         
         visualComponentTransform = transform.GetChild(0);
         // Debug.Log(visualComponentTransform.name);
         textTransform = transform.GetChild(1);
-        pokeEventInterpreter = transform.GetComponent<PokeEventInterpreter>();
         pokedListener = new UnityAction<bool>(EventCallback);
-        pokeEventInterpreter.RegisterForPokedEvent(pokedListener);
+        if(image != null) {
+            SetColor(Color.blue);
+        }
         lineRenderer = transform.GetComponentInChildren<LineRenderer>();
         flags.Add(this);
         Deactivate();
@@ -184,12 +186,21 @@ public class StandardFlag : IFlag
         visualComponentTransform.GetComponent<InstantiateMarkerVisual>().DeactivateMarker();
     }
 
+    public void ShowCubeMap(){
+        image.SetActive(true);
+    }
+
+    public void HideCubeMap(){
+        image.SetActive(false);
+    }
+
     public void ShowText() {
         if(!textIsSet) SetText();
         foreach(var f in currentFlags){
             f.textTransform.gameObject.SetActive(false);
         }
         textTransform.gameObject.SetActive(true);
+        selectedFlag = this;
     }
 
     public void ShowLineRenderer(){
@@ -219,10 +230,6 @@ public class StandardFlag : IFlag
 
     public static void OnDisable()
     {
-        foreach (var f in flags)
-        {
-            f.pokeEventInterpreter.UnregisterForPokedEvent(f.pokedListener);
-        }
         flags.Clear();
         currentTime = 700;
     }

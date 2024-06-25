@@ -13,10 +13,12 @@ public class CityButtonScript : MonoBehaviour
             isCityShowing = false;
             personalStandardFlag.HideLineRenderer();
             personalStandardFlag.HideText();
+            StandardFlag.selectedFlag = null;
         } else {
             isCityShowing = true;
             personalStandardFlag.ShowText();
             personalStandardFlag.ShowLineRenderer();
+            StandardFlag.selectedFlag = personalStandardFlag;
         }
     }
 

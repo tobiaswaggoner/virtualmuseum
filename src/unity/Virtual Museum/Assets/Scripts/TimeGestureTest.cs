@@ -31,10 +31,6 @@ public class TimeGestureTest : MonoBehaviour
             stepSpeed = stepDefaultSpeed;
         }
 
-        if(Input.GetKeyDown(KeyCode.F)){
-            SelectFirstFlag();
-        }
-
         if(start && timer >= stepSpeed){
             timer = 0;
             stepSpeed = stepSpeed <= 1f ? 1f : stepSpeed - 0.1f;
@@ -67,10 +63,6 @@ public class TimeGestureTest : MonoBehaviour
 
         // Map the dot product to a [0,1] range
         return (dotProduct + 1) / 2;
-        }
-
-        void SelectFirstFlag(){
-           interpreter.erscheinungsMap[StandardFlag.currentTime][0].pokeEventInterpreter.Selected();
         }
     }
 
