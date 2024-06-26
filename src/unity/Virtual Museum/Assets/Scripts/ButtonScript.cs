@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ButtonScript : MonoBehaviour
 {
+    private bool isPressed = false;
     static int counter = 0;
     private void Start() {
         counter = 0;
@@ -12,10 +13,11 @@ public class ButtonScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space)) {
             if(int.Parse(gameObject.transform.name) == 704 && counter == 0){
                 DisplayBlock();
+                isPressed = true;
                 counter ++;
-            } else if(int.Parse(gameObject.transform.name) == 774 && counter == 1){
-                DisplayBlock();
-                counter ++;
+            } else if(isPressed){
+                StandardFlag.HideBlock();
+                isPressed = false;
             }
         }
     }

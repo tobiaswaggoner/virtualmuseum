@@ -110,7 +110,7 @@ public class InputListener : MonoBehaviour
 
         ///If tool hasn't been placed, place tool at location and rotation of selection
         var newTool = Instantiate(Tools[toolIndex]);
-        placementPosition.y = -1.4f;
+        placementPosition.y = 0f;
         placementPosition.z = 1.2f;
         placementRotation = Quaternion.identity;
         newTool.transform.position = placementPosition;

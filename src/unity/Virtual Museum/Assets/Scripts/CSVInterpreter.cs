@@ -5,9 +5,15 @@ using TMPro;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 public class CSVInterpreter : MonoBehaviour
 {
+    //test
+    private bool sphereTest = false;
+    public Cubemap testCubeMap;
+    public GameObject cubeMapPrefab;
+    //test
     public LayerMask maskToIgnore;
     public float edgeBuffer = 0.001f;
     public float lowestX = 0;
@@ -19,8 +25,6 @@ public class CSVInterpreter : MonoBehaviour
     public float desiredHeight = 3;
     private Vector3 topLeftCorner = Vector3.zero;
     private Vector3 bottomRightCorner = Vector3.zero;
-
-    public LineRenderer lineRenderer;
 
     public GameObject pointPrefab;
 
@@ -70,7 +74,6 @@ public class CSVInterpreter : MonoBehaviour
         PlaceMarkers(records, gpsCoordinates);
 
         calculatedStuff = true;
-        lineRenderer.enabled = true;
     }
 
     private (List<int> ersterwähnungen, List<string> ort, List<string> landkreis, List<string> gpsOld) ParseCSVData(string csvText)
@@ -159,12 +162,23 @@ public class CSVInterpreter : MonoBehaviour
             if (Physics.Raycast(new Ray(oldPos, Vector3.down), out RaycastHit hit, 5f, ~maskToIgnore))
             {
                 Vector3 newPosition = hit.point + new Vector3(0, 0.1f, 0);
-                var newFlag = new StandardFlag(records.ersterwähnungen[i], hit.point, points[i].transform, Color.red, records.ort[i], $"Landkreis: {records.landkreis[i]}\n GPS: {records.gpsOld[i]}");
-
+                StandardFlag newFlag;
+                if(sphereTest) {
+                    newFlag = new StandardFlag(records.ersterwähnungen[i], hit.point, points[i].transform, Color.red, records.ort[i], $"Landkreis: {records.landkreis[i]}\n GPS: {records.gpsOld[i]}");
+                } else {
+                    Debug.Log(newPosition);
+                    //test
+                    sphereTest = true;
+                    GameObject personalCubeMap = CreateCubeMap(testCubeMap, cubeMapPrefab);
+                    newFlag = new StandardFlag(records.ersterwähnungen[i], hit.point, points[i].transform, Color.red, records.ort[i], $"Landkreis: {records.landkreis[i]}\n GPS: {records.gpsOld[i]}", personalCubeMap);
+                    //test
+                }
                 if (!erscheinungsMap.TryGetValue(records.ersterwähnungen[i], out var flagList))
                 {
                     erscheinungsMap[records.ersterwähnungen[i]] = new List<StandardFlag>();
                 }
+                
+                
                 erscheinungsMap[records.ersterwähnungen[i]].Add(newFlag);
                 points[i].transform.position = newPosition;
             }
@@ -173,5 +187,18 @@ public class CSVInterpreter : MonoBehaviour
                 Debug.LogWarning($"Raycast did not hit for position newX: {newX}, newZ: {newZ}");
             }
         }
+
+    }
+    private GameObject CreateCubeMap(Cubemap sourceTexture, GameObject spherePrefab){
+        if (sourceTexture == null || spherePrefab == null)
+        {
+            Debug.LogError("Source texture or sphere object is not assigned.");
+            return null;
+        }
+        var sphere = Instantiate(spherePrefab);
+        sphere.GetComponent<MeshRenderer>().material.mainTexture = sourceTexture;
+        sphere.SetActive(false);
+        return sphere;
+
     }
 }

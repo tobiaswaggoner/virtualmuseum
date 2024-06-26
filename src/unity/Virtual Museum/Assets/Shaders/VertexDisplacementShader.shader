@@ -5,7 +5,7 @@ Shader "Custom/HeightMapDeformSurface"
         _MainTex ("Texture", 2D) = "white" {}
         _HeightMap ("Height Map", 2D) = "black" {}
         _HeightScale ("Height Scale", Float) = 1.0
-        _MaskTex ("Mask texture", 2D) = "white" {}
+        _MaskTex ("Mask texture", 2D) = "transparent" {}
         _BlendFactor ("Blend Factor", Range(0,1)) = 0.5
     }
     SubShader
