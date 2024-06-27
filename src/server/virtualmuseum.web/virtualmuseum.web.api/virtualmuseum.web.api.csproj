@@ -6,4 +6,21 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\virtualmuseum.web.data\virtualmuseum.web.data.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="InputData\MuseumGPS.csv">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="InputData\Media\Spaziergang1.jpg">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    </ItemGroup>
+
 </Project>
