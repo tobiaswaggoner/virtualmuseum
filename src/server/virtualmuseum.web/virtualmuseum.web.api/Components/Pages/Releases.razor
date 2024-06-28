@@ -1,0 +1,82 @@
+﻿@page "/Releases"
+@rendermode InteractiveServer
+@using virtualmuseum.web.api.Services
+@using virtualmuseum.web.api.Services.Model
+
+@inject IReleaseService ReleaseService
+@inject NavigationManager NavigationManager
+
+<h3>Releases</h3>
+<div class="rounded-2 alert-light p-3 mt-5 mb-5" style="border: gray 1px solid;">
+    <h4>Hinweise zur Installation</h4>
+    <p>Hier finden sie alle veröffentlichten Versionen der App.</p>
+    <p>Verbinden Sie die Quest3 mit einem USB Kabel mit dem PC.</p>
+    <p style="color:salmon;font-weight: bold;">Die Quest3 muss eingeschaltet sein. Es muss der Developer Modus aktiviert sein. Sie müssen den Zugriff per USB erlaubt haben.</p>
+    <p>Nach dem Download einer Version öffnen sie eine Kommandozeile und führen sie folgende Befehle aus:</p>
+
+    <div class="rounded-2 p-2 mb-2 bg-black text-white">
+        <code class="text-white">
+            adb devices<br/>
+            adb uninstall com.DefaultCompany.VirtualMuseum<br/>
+            adb install -r "Pfad zur heruntergeladenen APK-Datei"
+        </code>
+    </div>
+    <p>
+        Die Datei liegt normalerweise im Download-Ordner. (C:\Users\BENUTZERNAME\Downloads\VirtualMuseum-VERSION.apk)
+        Ersetzen sie hier "VERSION" durch die entsprechende Versionsnummer und "BENUTZERNAME" durch ihren Windows Benutzernamen.
+    </p>
+    <p>
+        Beispiel:<br/>
+        <code class="rounded-2 p-2 mb-2 bg-black text-white">
+            adb install -r "C:\Users\<span style="color:red;">twaggoner</span>\Downloads\VirtualMuseum-<span style="color:red;">2024.06.27.4</span>.apk"
+        </code>
+    </p>
+</div>
+
+<button class="btn btn-link" @onclick="Refresh">Liste aktualisieren</button>
+
+<div class="row">
+    @{ var first = true;}
+    @foreach (var release in _releases)
+    {
+        <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3">
+            <div class="card m-2 rounded-2">
+                <div class=@((first ? "latest-release" : "earlier-release") +  " card-header")>
+                    <h5 class=@((first ? "latest-release" : "earlier-release") +  " card-title mb-0")>@release.Name</h5>
+                </div>
+                <div class="card-body hover-effect" @onclick="() => Download(release.ApkAssetUrl)">
+                    <p class="card-text">@release.PublishedAt.ToShortDateString()</p>
+                    <p class="card-text">@release.ApkAssetName</p>
+                    <p class="card-text fw-bold">DOWNLOAD</p>
+                </div>
+            </div>
+        </div>
+        first = false;
+    }
+</div>
+
+@code {
+    private List<Release>? _releases = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _releases = await ReleaseService.GetAllReleases();
+    }
+
+    private void Download(string? releaseApkAssetUrl)
+    {
+        if (releaseApkAssetUrl != null)
+        {
+            NavigationManager.NavigateTo(releaseApkAssetUrl);
+        }
+    }
+
+    private async Task Refresh()
+    {
+        _releases = [];
+        StateHasChanged();
+        _releases = await ReleaseService.Refresh();
+        StateHasChanged();
+    }
+
+}

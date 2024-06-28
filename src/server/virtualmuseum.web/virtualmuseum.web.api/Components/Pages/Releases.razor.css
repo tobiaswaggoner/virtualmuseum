@@ -1,0 +1,18 @@
+﻿.hover-effect:hover {
+    background-color: #e9ecef;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.label-hover:hover {
+    visibility: visible;
+}
+
+.latest-release {
+    background-color: lightgreen;
+    font-weight: bold;
+}
+
+.earlier-release {
+    background-color: lightgray;
+}
